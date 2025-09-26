@@ -1,22 +1,21 @@
 import React, { useState } from "react";
 import { FaBook, FaUserTie, FaClipboardCheck, FaChalkboardTeacher } from "react-icons/fa";
+import { Inertia } from "@inertiajs/inertia";
 
 const modules = [
   {
     name: "Catálogo",
-    color: "blue",
-    icon: <FaBook size={40} className="text-blue-600" />,
+    color: "burgundy",
+    icon: <FaBook size={40} className="text-red-800" />,
     submenus: [
-      { name: "Dar de alta", route: "/Catalogo/Carreras/create" },
-      { name: "Ver Carreras", route: "/Catalogo/Carreras/index" },
-      { name: "Editar", route: "/Catalogo/Carreras/edit" },
-      { name: "Eliminar", route: "/Catalogo/Carreras/delete" },
+      { name: "Dar de alta", route: "/catalogo/carreras/create" },
+      { name: "Ver Carreras", route: "/catalogo/carreras/index" },
     ],
   },
   {
     name: "Docente",
-    color: "green",
-    icon: <FaUserTie size={40} className="text-green-600" />,
+    color: "burgundy",
+    icon: <FaUserTie size={40} className="text-red-800" />,
     submenus: [
       { name: "Registrar", route: "/docentes/registrar" },
       { name: "Ver docentes", route: "/docentes/ver" },
@@ -26,8 +25,8 @@ const modules = [
   },
   {
     name: "Evaluaciones",
-    color: "yellow",
-    icon: <FaClipboardCheck size={40} className="text-yellow-600" />,
+    color: "burgundy",
+    icon: <FaClipboardCheck size={40} className="text-red-800" />,
     submenus: [
       { name: "Evaluación docente", route: "/evaluaciones/docente" },
       { name: "Evaluación departamental", route: "/evaluaciones/departamental" },
@@ -35,8 +34,8 @@ const modules = [
   },
   {
     name: "Capacitaciones",
-    color: "purple",
-    icon: <FaChalkboardTeacher size={40} className="text-purple-600" />,
+    color: "burgundy",
+    icon: <FaChalkboardTeacher size={40} className="text-red-800" />,
     submenus: [
       { name: "Dar de alta", route: "/capacitaciones/create" },
       { name: "Ver Capacitaciones", route: "/capacitaciones/index" },
@@ -57,10 +56,10 @@ export default function Dashboard() {
   };
 
   const handleMouseLeave = () => {
-    // Establecer un delay de 1.5 segundos antes de ocultar el menú
+    // Establecer un delay de 0.1 segundos antes de ocultar el menú
     const id = setTimeout(() => {
       setHoveredModule(null);
-    }, 100); // 1 segundo de delay
+    }, 100); // 0.1 segundo de delay
     setTimeoutId(id);
   };
 
@@ -73,40 +72,61 @@ export default function Dashboard() {
 
   const goTo = (route) => {
     // Con Inertia (descomenta si lo usas):
-    // Inertia.visit(route);
-
-    // Sin Inertia:
+    Inertia.visit(route);
     console.log("Navegando a:", route);
-    // window.location.href = route;
+  };
+
+  const getCardStyle = (color) => {
+    return "bg-white hover:shadow-lg";
+  };
+
+  const getTitleColor = (color) => {
+    return "text-red-800";
+  };
+
+  const getSubmenuStyle = (color) => {
+    return "bg-red-800 border-red-700";
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Sistema de Profesionalización Docente</h1>
+    <div className="min-h-screen bg-white p-6">
+      <div className="bg-red-800 rounded-3xl p-8 mb-8">
+        <h1 className="text-4xl font-bold text-white text-center">
+          Sistema de Profesionalización Docente
+        </h1>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {modules.map((mod) => (
           <div
             key={mod.name}
-            className="bg-white rounded-2xl shadow-md p-6 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 relative"
+            className={`${getCardStyle(mod.color)} rounded-2xl shadow-md p-6 cursor-pointer transition-all duration-300 hover:scale-105 relative`}
             onMouseEnter={() => handleMouseEnter(mod.name)}
             onMouseLeave={handleMouseLeave}
           >
             {/* Contenido principal de la carta */}
-            <div className="flex flex-col items-center">
-              <div className="mb-4">{mod.icon}</div>
-              <h2 className={`text-xl font-semibold text-${mod.color}-600`}>{mod.name}</h2>
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4">
+                {mod.icon}
+              </div>
+              <h2 className={`text-xl font-bold ${getTitleColor(mod.color)}`}>
+                {mod.name}
+              </h2>
               <p className="text-gray-500 mt-2 text-sm">{mod.description}</p>
             </div>
 
             {/* Submenu que aparece al hacer hover */}
             {hoveredModule === mod.name && (
-              <div className="absolute top-full left-0 right-0 bg-white rounded-lg shadow-lg border mt-2 z-10 animate-in fade-in duration-200">
+              <div 
+                className={`absolute top-full left-0 right-0 ${getSubmenuStyle(mod.color)} rounded-lg shadow-lg border mt-2 z-10 animate-in fade-in duration-200`}
+                onMouseEnter={handleSubmenuMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
                 <div className="p-2">
                   {mod.submenus.map((sub, index) => (
                     <div
                       key={sub.name}
-                      className="py-2 px-3 rounded hover:bg-gray-100 cursor-pointer text-gray-700 transition-colors duration-150 text-sm"
+                      className="py-2 px-3 rounded hover:bg-red-700 cursor-pointer text-yellow-500 transition-colors duration-150 text-sm font-medium hover:text-yellow-400"
                       onClick={(e) => {
                         e.stopPropagation();
                         goTo(sub.route);
@@ -118,6 +138,7 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
+
           </div>
         ))}
       </div>

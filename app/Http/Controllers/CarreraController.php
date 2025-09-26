@@ -11,39 +11,49 @@ class CarreraController extends Controller
     public function index()
     {
         $carreras = Carrera::all();
-        return Inertia::render('Catalogo/Carreras/Index', compact('carreras'));
+        return Inertia::render('catalogo/carreras/index', [
+        'carreras' => $carreras
+        ]);
     }
 
     public function create()
     {
-        return Inertia::render('Catalogo/Carreras/Create');
+        return Inertia::render('catalogo/carreras/create');
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'nombre' => 'required|unique:carreras,nombre',
-            'siglas' => 'nullable|string',
+        'nombre' => 'required|string|max:255|unique:carreras,nombre',
+        'siglas' => 'nullable|string|max:255|unique:carreras,siglas',
         ]);
 
-        Carrera::create($request->all());
+    Carrera::create([
+        'nombre' => $request->nombre,
+        'siglas' => $request->siglas,
+        ]);
 
-        return redirect()->route('carreras.index');
+     return redirect()->route('carreras.index');
     }
 
     public function edit(Carrera $carrera)
     {
-        return Inertia::render('Catalogo/Carreras/Edit', compact('carrera'));
+        return Inertia::render('catalogo/carreras/edit', [
+        'carrera' => $carrera,
+        ]);
     }
 
     public function update(Request $request, Carrera $carrera)
     {
-        $request->validate([
-            'nombre' => 'required|unique:carreras,nombre,' . $carrera->id,
-            'siglas' => 'nullable|string',
+       $request->validate([
+        'nombre' => 'required|string|max:255|unique:carreras,nombre,' . $carrera->id,
+        'siglas' => 'nullable|string|max:255',
         ]);
 
-        $carrera->update($request->all());
+        $carrera->update([
+            'nombre' => $request->nombre,
+            'siglas' => $request->siglas,
+        ]);
 
         return redirect()->route('carreras.index');
     }
