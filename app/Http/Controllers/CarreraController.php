@@ -8,11 +8,23 @@ use Inertia\Inertia;
 
 class CarreraController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $carreras = Carrera::all();
+        $search = $request->input('search');
+
+         $carreras = Carrera::query()
+        ->when($search, function ($query, $search) {
+            $query->where('nombre', 'ILIKE', "%{$search}%")
+                  ->orWhere('siglas', 'ILIKE', "%{$search}%");
+        })
+        ->orderBy('id', 'asc')
+        ->get();
+
         return Inertia::render('catalogo/carreras/index', [
-        'carreras' => $carreras
+            'carreras' => $carreras,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 

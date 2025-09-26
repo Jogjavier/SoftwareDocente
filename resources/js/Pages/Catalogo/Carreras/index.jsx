@@ -1,44 +1,57 @@
-import React from "react";
+import React, { useState } from "react";
 import { Inertia } from "@inertiajs/inertia";
 
-export default function Index({ carreras = [] }) {
+export default function Index({ carreras = [], filters = {} }) {
+  const [search, setSearch] = useState(filters.search || "");
+
   const handleDelete = (id) => {
     if (confirm("¿Seguro que deseas eliminar esta carrera?")) {
       Inertia.delete(`/catalogo/carreras/${id}`);
-      console.log("Eliminando carrera con ID:", id);
     }
   };
 
   const handleEdit = (id) => {
     Inertia.visit(`/catalogo/carreras/${id}/edit`);
-    console.log("Editando carrera con ID:", id);
   };
 
-  const handleGoBack = () => {
-    Inertia.visit("/"); // Ajusta la ruta si tu Dashboard está en otra URL
+  const handleSearch = (e) => {
+    e.preventDefault();
+    Inertia.get("/catalogo/carreras/index", { search });
   };
-
-  // Datos de ejemplo si no hay carreras
-  const carrerasData = carreras.length > 0 ? carreras : [];
 
   return (
     <div className="min-h-screen bg-white p-6">
-      {/* Botón para regresar */}
-      <div className="mb-4 flex justify-start">
+      {/* Header */}
+      <div className="bg-red-800 rounded-xl p-6 mb-6 flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-white">Listado de Carreras</h1>
+
+        {/* Botón regresar al dashboard */}
         <button
-          onClick={handleGoBack}
-          className="px-4 py-2 bg-yellow-400 text-red-800 font-semibold rounded hover:bg-yellow-300 transition-colors duration-200 shadow"
+          onClick={() => Inertia.visit("/dashboard")}
+          className="bg-yellow-400 text-red-800 px-4 py-2 rounded font-semibold hover:bg-yellow-300"
         >
-          ← Regresar a pantalla de inicio 
+          Dashboard
         </button>
       </div>
 
-      {/* Header con fondo guinda */}
-      <div className="bg-red-800 rounded-xl p-6 mb-6">
-        <h1 className="text-3xl font-bold text-white">Listado de Carreras</h1>
-      </div>
+      {/* Barra de búsqueda */}
+      <form onSubmit={handleSearch} className="mb-4 flex gap-2">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por nombre o siglas..."
+          className="border border-gray-300 p-2 rounded w-80"
+        />
+        <button
+          type="submit"
+          className="bg-red-800 text-yellow-400 px-4 py-2 rounded hover:bg-red-700"
+        >
+          Buscar
+        </button>
+      </form>
 
-      {/* Contenedor de la tabla */}
+      {/* Tabla */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
         <table className="w-full">
           <thead>
@@ -50,29 +63,37 @@ export default function Index({ carreras = [] }) {
             </tr>
           </thead>
           <tbody>
-            {carrerasData.map((carrera, index) => (
-              <tr key={carrera.id} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                <td className="p-3 border-r border-gray-200 text-gray-800">{carrera.id}</td>
-                <td className="p-3 border-r border-gray-200 text-gray-800">{carrera.nombre}</td>
-                <td className="p-3 border-r border-gray-200 text-gray-800">{carrera.siglas}</td>
-                <td className="p-3 border-gray-200">
-                  <div className="flex gap-2 justify-center">
-                    <button
-                      onClick={() => handleEdit(carrera.id)}
-                      className="px-4 py-2 bg-red-800 text-yellow-400 hover:bg-red-700 hover:text-yellow-300 rounded transition-colors duration-200 font-medium"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(carrera.id)}
-                      className="px-4 py-2 bg-red-800 text-yellow-400 hover:bg-red-900 hover:text-yellow-300 rounded transition-colors duration-200 font-medium"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
+            {carreras.length > 0 ? (
+              carreras.map((carrera, index) => (
+                <tr key={carrera.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <td className="p-3 border-r border-gray-200 text-gray-800">{carrera.id}</td>
+                  <td className="p-3 border-r border-gray-200 text-gray-800">{carrera.nombre}</td>
+                  <td className="p-3 border-r border-gray-200 text-gray-800">{carrera.siglas}</td>
+                  <td className="p-3 border-gray-200">
+                    <div className="flex gap-2 justify-center">
+                      <button
+                        onClick={() => handleEdit(carrera.id)}
+                        className="px-4 py-2 bg-red-800 text-yellow-400 hover:bg-red-700 rounded"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleDelete(carrera.id)}
+                        className="px-4 py-2 bg-red-800 text-yellow-400 hover:bg-red-900 rounded"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="p-4 text-center text-gray-500">
+                  No se encontraron carreras
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
