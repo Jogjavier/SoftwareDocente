@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\CarreraController;
+use App\Http\Controllers\DocenteController;
 
 Route::get('/', function () {
     return Inertia::render('Dashboard');
@@ -14,9 +15,23 @@ Route::get('/dashboard', function () {
     return Inertia\Inertia::render('Dashboard');
 });
 
-Route::get('/catalogo/carreras/index', [CarreraController::class, 'index'])->name('carreras.index');
-Route::get('/catalogo/carreras/create', [CarreraController::class, 'create'])->name('carreras.create');
-Route::post('/catalogo/carreras', [CarreraController::class, 'store'])->name('carreras.store');
-Route::get('/catalogo/carreras/{carrera}/edit', [CarreraController::class, 'edit'])->name('carreras.edit');
-Route::put('/catalogo/carreras/{carrera}', [CarreraController::class, 'update'])->name('carreras.update');
-Route::delete('/catalogo/carreras/{carrera}', [CarreraController::class, 'destroy'])->name('carreras.destroy');
+// Carreras
+Route::prefix('catalogo/carreras')->name('carreras.')->group(function () {
+    Route::get('/index', [CarreraController::class, 'index'])->name('index');
+    Route::get('/create', [CarreraController::class, 'create'])->name('create');
+    Route::post('/', [CarreraController::class, 'store'])->name('store');
+    Route::get('/{carrera}/edit', [CarreraController::class, 'edit'])->name('edit');
+    Route::put('/{carrera}', [CarreraController::class, 'update'])->name('update');
+    Route::delete('/{carrera}', [CarreraController::class, 'destroy'])->name('destroy');
+});
+
+// Docentes
+Route::prefix('docentes')->name('docentes.')->group(function () {
+    Route::get('/create', [DocenteController::class, 'create'])->name('create');
+    Route::post('/', [DocenteController::class, 'store'])->name('store');
+    Route::get('/index', [DocenteController::class, 'index'])->name('index');
+    Route::get('/{docente}', [DocenteController::class, 'show'])->name('show');
+    Route::get('/{docente}/edit', [DocenteController::class, 'edit'])->name('edit');
+    Route::put('/{docente}', [DocenteController::class, 'update'])->name('update');
+    Route::delete('/{docente}', [DocenteController::class, 'destroy'])->name('destroy');
+});

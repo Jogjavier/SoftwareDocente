@@ -17,10 +17,8 @@ const modules = [
     color: "burgundy",
     icon: <FaUserTie size={40} className="text-red-800" />,
     submenus: [
-      { name: "Registrar", route: "/docentes/registrar" },
-      { name: "Ver docentes", route: "/docentes/ver" },
-      { name: "Editar", route: "/docentes/editar" },
-      { name: "Eliminar", route: "/docentes/eliminar" },
+      { name: "Registrar", route: "/docentes/create" },
+      { name: "Ver docentes", route: "/docentes/index" },
     ],
   },
   {
