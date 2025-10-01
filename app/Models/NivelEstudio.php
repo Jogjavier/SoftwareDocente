@@ -9,17 +9,16 @@ class NivelEstudio extends Model
 {
     use HasFactory;
 
-    protected $table = 'niveles_estudios';
+    protected $table = 'nivel_estudios';
 
     protected $fillable = [
         'docente_id',
-        'nivel',   // Licenciatura, Maestría, Doctorado
+        'nivel',
         'siglas',
         'nombre',
-        'cedula',
         'escuela_procedencia',
         'titulo_path',
-        'cedula_path'
+        'cedula_path',
     ];
 
     public function docente()

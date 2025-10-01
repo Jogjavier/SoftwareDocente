@@ -35,3 +35,4 @@ Route::prefix('docentes')->name('docentes.')->group(function () {
     Route::put('/{docente}', [DocenteController::class, 'update'])->name('update');
     Route::delete('/{docente}', [DocenteController::class, 'destroy'])->name('destroy');
 });
+Route::resource('docentes.niveles', NivelEstudiosController::class);

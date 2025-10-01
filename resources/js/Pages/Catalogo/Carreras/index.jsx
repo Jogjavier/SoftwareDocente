@@ -27,10 +27,10 @@ export default function Index({ carreras = [], filters = {} }) {
 
         {/* Botón regresar al dashboard */}
         <button
-          onClick={() => Inertia.visit("/dashboard")}
+          onClick={() => Inertia.visit("/")}
           className="bg-yellow-400 text-red-800 px-4 py-2 rounded font-semibold hover:bg-yellow-300"
         >
-          Dashboard
+          Inicio
         </button>
       </div>
 

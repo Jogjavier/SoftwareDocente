@@ -56,6 +56,61 @@ export default function Detalles({ docente }) {
             <p className="text-gray-600 font-semibold">Nivel de Inglés:</p>
             <p className="text-gray-800">{docente.nivel_ingles}</p>
           </div>
+
+          <div className="sm:col-span-2">
+            <h3 className="text-xl font-bold text-red-800 mb-4">Niveles de Estudio</h3>
+            {docente.niveles && docente.niveles.length > 0 ? (
+              <div className="space-y-4">
+                {docente.niveles.map((nivel, index) => (
+                  <div key={index} className="border p-4 rounded-lg bg-gray-50">
+                    {/* ✅ CORREGIDO: Usar los nombres correctos de los campos */}
+                    <p className="text-gray-600 font-semibold">Nivel:</p>
+                    <p className="text-gray-800">{nivel.nivel}</p>
+                    
+                    <p className="text-gray-600 font-semibold">Siglas:</p>
+                    <p className="text-gray-800">{nivel.siglas}</p>
+                    
+                    <p className="text-gray-600 font-semibold">Nombre:</p>
+                    <p className="text-gray-800">{nivel.nombre}</p>
+                    
+                    <p className="text-gray-600 font-semibold">Escuela de Procedencia:</p>
+                    <p className="text-gray-800">{nivel.escuela_procedencia}</p>
+                    
+                    {/* Mostrar archivos si existen */}
+                    {nivel.titulo_path && (
+                      <>
+                        <p className="text-gray-600 font-semibold">Título:</p>
+                        <a 
+                          href={`/storage/${nivel.titulo_path}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Ver título
+                        </a>
+                      </>
+                    )}
+                    
+                    {nivel.cedula_path && (
+                      <>
+                        <p className="text-gray-600 font-semibold">Cédula:</p>
+                        <a 
+                          href={`/storage/${nivel.cedula_path}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Ver cédula
+                        </a>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-600">No hay niveles de estudio disponibles.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

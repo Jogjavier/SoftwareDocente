@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Inertia } from "@inertiajs/inertia";
 
 export default function Create() {
+  // --- Datos del docente ---
   const [nombres, setNombres] = useState("");
   const [apellido_paterno, setApellidoPaterno] = useState("");
   const [apellido_materno, setApellidoMaterno] = useState("");
@@ -13,30 +14,64 @@ export default function Create() {
   const [telefono, setTelefono] = useState("");
   const [nivel_ingles, setNivelIngles] = useState("");
 
+  // --- Niveles ---
+  const [niveles, setNiveles] = useState([]);
+
+  const addNivel = (tipo) => {
+    setNiveles([
+      ...niveles,
+      { tipo, siglas: "", nombre: "", escuela: "", titulo: null, cedula: null },
+    ]);
+  };
+
+  const handleNivelChange = (index, field, value) => {
+    const nuevos = [...niveles];
+    nuevos[index][field] = value;
+    setNiveles(nuevos);
+  };
+
+  const handleFileChange = (index, field, file) => {
+    const nuevos = [...niveles];
+    nuevos[index][field] = file;
+    setNiveles(nuevos);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    Inertia.post("/docentes", {
-      nombres,
-      apellido_paterno,
-      apellido_materno,
-      fecha_nacimiento,
-      sexo,
-      rfc,
-      curp,
-      email,
-      telefono,
-      nivel_ingles,
+
+    const formData = new FormData();
+
+    // Datos del docente
+    formData.append("nombres", nombres);
+    formData.append("apellido_paterno", apellido_paterno);
+    formData.append("apellido_materno", apellido_materno);
+    formData.append("fecha_nacimiento", fecha_nacimiento);
+    formData.append("sexo", sexo);
+    formData.append("rfc", rfc);
+    formData.append("curp", curp);
+    formData.append("email", email);
+    formData.append("telefono", telefono);
+    formData.append("nivel_ingles", nivel_ingles);
+
+    // Datos de niveles - CORREGIDOS los nombres de archivos
+    niveles.forEach((nivel, index) => {
+      formData.append(`niveles[${index}][nivel]`, nivel.tipo);
+      formData.append(`niveles[${index}][siglas]`, nivel.siglas);
+      formData.append(`niveles[${index}][nombre]`, nivel.nombre);
+      formData.append(`niveles[${index}][escuela_procedencia]`, nivel.escuela);
+
+      // ✅ CORREGIDO: Usar titulo_path y cedula_path en lugar de titulo y cedula
+      if (nivel.titulo) {
+        formData.append(`niveles[${index}][titulo_path]`, nivel.titulo);
+      }
+      if (nivel.cedula) {
+        formData.append(`niveles[${index}][cedula_path]`, nivel.cedula);
+      }
     });
-    setNombres("");
-    setApellidoPaterno("");
-    setApellidoMaterno("");
-    setFechaNacimiento("");
-    setSexo("");
-    setRfc("");
-    setCurp("");
-    setEmail("");
-    setTelefono("");
-    setNivelIngles("");
+
+    Inertia.post("/docentes", formData, {
+      forceFormData: true, 
+    });
   };
 
   return (
@@ -173,6 +208,67 @@ export default function Create() {
               <option value="Alto">Alto</option>
             </select>
           </div>
+
+          {/* Botones para añadir niveles */}
+          <div className="flex gap-2">
+            <button type="button" onClick={() => addNivel("Licenciatura")} className="bg-red-800 text-white px-3 py-1 rounded">
+              Añadir Licenciatura
+            </button>
+            <button type="button" onClick={() => addNivel("Maestría")} className="bg-red-800 text-white px-3 py-1 rounded">
+              Añadir Maestría
+            </button>
+            <button type="button" onClick={() => addNivel("Doctorado")} className="bg-red-800 text-white px-3 py-1 rounded">
+              Añadir Doctorado
+            </button>
+          </div>
+
+          {/* Lista de niveles añadidos */}
+          {niveles.map((nivel, index) => (
+            <div key={index} className="border rounded p-3 bg-gray-50 mt-4">
+              <h2 className="font-semibold">{nivel.tipo}</h2>
+              <input
+                type="text"
+                placeholder="Siglas"
+                value={nivel.siglas}
+                onChange={(e) => handleNivelChange(index, "siglas", e.target.value)}
+                className="border p-2 w-full mb-2"
+              />
+              <input
+                type="text"
+                placeholder={`Nombre de la ${nivel.tipo}`}
+                value={nivel.nombre}
+                onChange={(e) => handleNivelChange(index, "nombre", e.target.value)}
+                className="border p-2 w-full mb-2"
+              />
+              <input
+                type="text"
+                placeholder="Escuela de procedencia"
+                value={nivel.escuela}
+                onChange={(e) => handleNivelChange(index, "escuela", e.target.value)}
+                className="border p-2 w-full mb-2"
+              />
+
+              {/* Archivos */}
+              <div className="mb-2">
+                <label className="block text-gray-700">Título:</label>
+                <input
+                  type="file"
+                  accept="application/pdf,image/*"
+                  onChange={(e) => handleFileChange(index, "titulo", e.target.files[0])}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700">Cédula:</label>
+                <input
+                  type="file"
+                  accept="application/pdf,image/*"
+                  onChange={(e) => handleFileChange(index, "cedula", e.target.files[0])}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          ))}
 
           {/* Botón Guardar */}
           <div>

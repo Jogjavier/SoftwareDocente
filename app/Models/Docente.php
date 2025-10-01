@@ -25,9 +25,9 @@ class Docente extends Model
     ];
 
     // Relaciones
-    public function nivelesEstudios()
+    public function niveles()
     {
-        return $this->hasMany(NivelEstudio::class);
+        return $this->hasMany(NivelEstudio::class, 'docente_id');
     }
 
     public function experienciasDocentes()

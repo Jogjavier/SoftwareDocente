@@ -32,27 +32,55 @@ class DocenteController extends Controller
     }
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'nombres' => 'required|string',
-            'apellido_paterno' => 'required|string',
-            'apellido_materno' => 'nullable|string',
-            'fecha_nacimiento' => 'required|date',
-            'sexo' => 'required|in:M,F',
-            'rfc' => 'required|string|unique:docentes',
-            'curp' => 'required|string|unique:docentes',
-            'email' => 'required|email|unique:docentes,email',
-            'telefono' => 'nullable|string',
-            'nivel_ingles' => 'required|string',
-        ]);
+        $docenteData = $request->validate([
+        'nombres' => 'required|string',
+        'apellido_paterno' => 'required|string',
+        'apellido_materno' => 'nullable|string',
+        'fecha_nacimiento' => 'required|date',
+        'sexo' => 'required|in:M,F',
+        'rfc' => 'required|string|unique:docentes',
+        'curp' => 'required|string|unique:docentes',
+        'email' => 'required|email|unique:docentes,email',
+        'telefono' => 'nullable|string',
+        'nivel_ingles' => 'required|string',
+    ]);
 
-        Docente::create($data);
+    // Crear el docente
+    $docente = Docente::create($docenteData);
 
-        return redirect()->route('docentes.index')->with('success', 'Docente creado exitosamente');
+    // Guardar niveles si existen - SIN validación estricta
+    if ($request->has('niveles') && is_array($request->niveles)) {
+        foreach ($request->niveles as $nivelData) {
+            $nivel = [
+                'nivel' => $nivelData['nivel'] ?? null,
+                'siglas' => $nivelData['siglas'] ?? null,
+                'nombre' => $nivelData['nombre'] ?? null,
+                'escuela_procedencia' => $nivelData['escuela_procedencia'] ?? null,
+            ];
+
+            // Manejar archivos - verificar si es un archivo válido
+            if (isset($nivelData['titulo_path']) && $nivelData['titulo_path'] instanceof \Illuminate\Http\UploadedFile) {
+                $nivel['titulo_path'] = $nivelData['titulo_path']->store('titulos', 'public');
+            }
+            
+            if (isset($nivelData['cedula_path']) && $nivelData['cedula_path'] instanceof \Illuminate\Http\UploadedFile) {
+                $nivel['cedula_path'] = $nivelData['cedula_path']->store('cedulas', 'public');
+            }
+
+            // Solo crear el nivel si tiene al menos el campo 'nivel'
+            if (!empty($nivel['nivel'])) {
+                $docente->niveles()->create($nivel);
+            }
+        }
+    }
+
+    return redirect()->route('docentes.index')->with('success', 'Docente creado exitosamente');
 
     }
+    
     public function show($id)
     {
-        $docente = Docente::findOrFail($id);
+        $docente = Docente::with('niveles')->findOrFail($id);
 
         return Inertia::render('docentes/Detalles', [
             'docente' => $docente
@@ -60,6 +88,8 @@ class DocenteController extends Controller
     }
     public function edit(Docente $docente)
     {
+        $docente->load('niveles');
+
         return Inertia::render('docentes/Edit', [
             'docente' => $docente
         ]);
@@ -67,22 +97,51 @@ class DocenteController extends Controller
     public function update(Request $request, Docente $docente)
     {
         $data = $request->validate([
-            'nombres' => 'required|string|unique:docentes,nombres,' . $docente->id,
-            'apellido_paterno' => 'required|string|unique:docentes,apellido_paterno,' . $docente->id,
-            'apellido_materno' => 'nullable|string|unique:docentes,apellido_materno,' . $docente->id,
-            'fecha_nacimiento' => 'required|date',
-            'sexo' => 'required|in:M,F',
-            'rfc' => 'required|string|unique:docentes,rfc,' . $docente->id,
-            'curp' => 'required|string|unique:docentes,curp,' . $docente->id,
-            'email' => 'required|email|unique:docentes,email,' . $docente->id,
-            'telefono' => 'nullable|string',
-            'nivel_ingles' => 'required|string',
+        'nombres' => 'required|string',
+        'apellido_paterno' => 'required|string',
+        'apellido_materno' => 'nullable|string',
+        'fecha_nacimiento' => 'required|date',
+        'sexo' => 'required|in:M,F',
+        'rfc' => 'required|string|unique:docentes,rfc,' . $docente->id,
+        'curp' => 'required|string|unique:docentes,curp,' . $docente->id,
+        'email' => 'required|email|unique:docentes,email,' . $docente->id,
+        'telefono' => 'nullable|string',
+        'nivel_ingles' => 'required|string',
+        'niveles' => 'array',
         ]);
 
         $docente->update($data);
 
+        // ✅ Actualizar niveles existentes y crear nuevos
+        if ($request->has('niveles')) {
+            foreach ($request->niveles as $nivelData) {
+                $nivel = [
+                    'nivel' => $nivelData['nivel'] ?? null,
+                    'siglas' => $nivelData['siglas'] ?? null,
+                    'nombre' => $nivelData['nombre'] ?? null,
+                    'escuela_procedencia' => $nivelData['escuela_procedencia'] ?? null,
+                ];
+
+                // Manejar archivos
+                if (isset($nivelData['titulo_path']) && $nivelData['titulo_path'] instanceof \Illuminate\Http\UploadedFile) {
+                    $nivel['titulo_path'] = $nivelData['titulo_path']->store('titulos', 'public');
+                }
+                
+                if (isset($nivelData['cedula_path']) && $nivelData['cedula_path'] instanceof \Illuminate\Http\UploadedFile) {
+                    $nivel['cedula_path'] = $nivelData['cedula_path']->store('cedulas', 'public');
+                }
+
+                // Si tiene ID, actualizar; si no, crear nuevo
+                if (!empty($nivelData['id'])) {
+                    $docente->niveles()->where('id', $nivelData['id'])->update($nivel);
+                } else {
+                    $docente->niveles()->create($nivel);
+                }
+            }
+        }
+
         return redirect()->route('docentes.index')->with('success', 'Docente actualizado exitosamente');
-    }
+ }
     public function destroy(Docente $docente)
     {
         $docente->delete();

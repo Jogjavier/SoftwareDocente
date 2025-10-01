@@ -10,14 +10,6 @@ export default function Index({ docentes = [], filters = {} }) {
     }
   };
 
-  const handleEdit = (id) => {
-    Inertia.visit(`/docentes/${id}/edit`);
-  };
-
-  const handleDetails = (id) => {
-    Inertia.visit(`/docentes/${id}/detalles`);
-  };
-
   const handleSearch = (e) => {
     e.preventDefault();
     Inertia.get("/docentes/index", { search });
@@ -32,7 +24,7 @@ export default function Index({ docentes = [], filters = {} }) {
           onClick={() => Inertia.visit("/")}
           className="bg-yellow-400 text-red-800 px-4 py-2 rounded font-semibold hover:bg-yellow-300"
         >
-          Dashboard
+          Inicio
         </button>
       </div>
 
@@ -82,6 +74,7 @@ export default function Index({ docentes = [], filters = {} }) {
                   </td>
                   <td className="p-3 border-gray-200">
                     <div className="flex gap-2 justify-center">
+                      {/* ✅ SOLO UN BOTÓN DE DETALLES */}
                       <button
                         onClick={() => Inertia.visit(`/docentes/${docente.id}`)}
                         className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-500 rounded"
@@ -95,7 +88,7 @@ export default function Index({ docentes = [], filters = {} }) {
                         Editar
                       </button>
                       <button
-                        onClick={() => Inertia.visit(`/docentes/${docente.id}`)}
+                        onClick={() => handleDelete(docente.id)}
                         className="px-4 py-2 bg-red-600 text-white hover:bg-red-500 rounded"
                       >
                         Eliminar
