@@ -20,7 +20,7 @@ export default function Create() {
   const addNivel = (tipo) => {
     setNiveles([
       ...niveles,
-      { tipo, siglas: "", nombre: "", escuela: "", titulo: null, cedula: null },
+      { tipo, siglas: "", nombre: "", escuela: "",  cedula: "", titulo: null, cedula_path: null },
     ]);
   };
 
@@ -59,13 +59,14 @@ export default function Create() {
       formData.append(`niveles[${index}][siglas]`, nivel.siglas);
       formData.append(`niveles[${index}][nombre]`, nivel.nombre);
       formData.append(`niveles[${index}][escuela_procedencia]`, nivel.escuela);
+      formData.append(`niveles[${index}][cedula]`, nivel.cedula);
 
       // ✅ CORREGIDO: Usar titulo_path y cedula_path en lugar de titulo y cedula
       if (nivel.titulo) {
         formData.append(`niveles[${index}][titulo_path]`, nivel.titulo);
       }
-      if (nivel.cedula) {
-        formData.append(`niveles[${index}][cedula_path]`, nivel.cedula);
+      if (nivel.cedula_path) {
+        formData.append(`niveles[${index}][cedula_path]`, nivel.cedula_path);
       }
     });
 
@@ -247,6 +248,13 @@ export default function Create() {
                 onChange={(e) => handleNivelChange(index, "escuela", e.target.value)}
                 className="border p-2 w-full mb-2"
               />
+              <input
+                  type="text"
+                  placeholder="Número de Cédula"
+                  value={nivel.cedula}
+                  onChange={(e) => handleNivelChange(index, "cedula", e.target.value)}
+                  className="border p-2 w-full mb-2"
+              />
 
               {/* Archivos */}
               <div className="mb-2">
@@ -263,7 +271,7 @@ export default function Create() {
                 <input
                   type="file"
                   accept="application/pdf,image/*"
-                  onChange={(e) => handleFileChange(index, "cedula", e.target.files[0])}
+                  onChange={(e) => handleFileChange(index, "cedula_path", e.target.files[0])}
                   className="w-full"
                 />
               </div>

@@ -75,6 +75,9 @@ export default function Detalles({ docente }) {
                     
                     <p className="text-gray-600 font-semibold">Escuela de Procedencia:</p>
                     <p className="text-gray-800">{nivel.escuela_procedencia}</p>
+
+                    <p className="text-gray-600 font-semibold">Número de Cédula:</p>
+                    <p className="text-gray-800">{nivel.cedula}</p>
                     
                     {/* Mostrar archivos si existen */}
                     {nivel.titulo_path && (

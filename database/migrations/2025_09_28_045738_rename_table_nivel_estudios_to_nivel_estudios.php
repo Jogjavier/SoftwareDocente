@@ -18,6 +18,7 @@ return new class extends Migration
         $table->string('siglas', 50)->nullable();
         $table->string('nombre')->nullable();
         $table->string('escuela_procedencia')->nullable();
+        $table->string('cedula')->nullable(); // Nuevo campo para número de cédula
         $table->string('titulo_path')->nullable(); // archivo título
         $table->string('cedula_path')->nullable(); // archivo cédula
         $table->timestamps();

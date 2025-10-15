@@ -16,6 +16,7 @@ class NivelEstudio extends Model
         'nivel',
         'siglas',
         'nombre',
+        'cedula',
         'escuela_procedencia',
         'titulo_path',
         'cedula_path',

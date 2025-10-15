@@ -55,6 +55,7 @@ class DocenteController extends Controller
                 'nivel' => $nivelData['nivel'] ?? null,
                 'siglas' => $nivelData['siglas'] ?? null,
                 'nombre' => $nivelData['nombre'] ?? null,
+                'cedula' => $nivelData['cedula'] ?? null,
                 'escuela_procedencia' => $nivelData['escuela_procedencia'] ?? null,
             ];
 
@@ -119,6 +120,7 @@ class DocenteController extends Controller
                     'nivel' => $nivelData['nivel'] ?? null,
                     'siglas' => $nivelData['siglas'] ?? null,
                     'nombre' => $nivelData['nombre'] ?? null,
+                    'cedula' => $nivelData['cedula'] ?? null,
                     'escuela_procedencia' => $nivelData['escuela_procedencia'] ?? null,
                 ];
 

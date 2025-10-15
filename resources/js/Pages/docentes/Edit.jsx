@@ -20,6 +20,7 @@ export default function Edit({ docente }) {
       siglas: nivel.siglas || "",
       nombre: nivel.nombre || "",
       escuela_procedencia: nivel.escuela_procedencia || "", 
+      cedula: nivel.cedula || "",
       titulo_path: nivel.titulo_path || "", 
       cedula_path: nivel.cedula_path || "", 
       titulo_file: null, 
@@ -57,6 +58,7 @@ export default function Edit({ docente }) {
           siglas: "",
           nombre: "",
           escuela_procedencia: "",
+          cedula: "",
           titulo_path: "",
           cedula_path: "",
           titulo_file: null,
@@ -108,6 +110,7 @@ export default function Edit({ docente }) {
       formData.append(`niveles[${index}][siglas]`, nivel.siglas);
       formData.append(`niveles[${index}][nombre]`, nivel.nombre);
       formData.append(`niveles[${index}][escuela_procedencia]`, nivel.escuela_procedencia);
+      formData.append(`niveles[${index}][cedula]`, nivel.cedula);
       
       // Archivos nuevos
       if (nivel.titulo_file) {
@@ -333,21 +336,21 @@ export default function Edit({ docente }) {
               <button
                 type="button"
                 onClick={() => addNivel("Licenciatura")}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500"
+                className="bg-red-800 text-white px-3 py-1 rounded"
               >
                 + Añadir Licenciatura
               </button>
               <button
                 type="button"
                 onClick={() => addNivel("Maestría")}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500"
+                className="bg-red-800 text-white px-3 py-1 rounded"
               >
                 + Añadir Maestría
               </button>
               <button
                 type="button"
                 onClick={() => addNivel("Doctorado")}
-                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-500"
+                className="bg-red-800 text-white px-3 py-1 rounded"
               >
                 + Añadir Doctorado
               </button>
@@ -389,6 +392,13 @@ export default function Edit({ docente }) {
                       value={nivel.escuela_procedencia}
                       onChange={(e) => handleNivelChange(index, "escuela_procedencia", e.target.value)}
                       className="border p-2 rounded md:col-span-2"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Número de Cédula"
+                      value={nivel.cedula}
+                      onChange={(e) => handleNivelChange(index, "cedula", e.target.value)}
+                      className="border p-2 rounded"
                     />
                   </div>
 
