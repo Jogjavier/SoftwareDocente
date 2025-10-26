@@ -30,28 +30,8 @@ class Docente extends Model
         return $this->hasMany(NivelEstudio::class, 'docente_id');
     }
 
-    public function experienciasDocentes()
+    public function experiencias()
     {
         return $this->hasMany(ExperienciaDocente::class);
-    }
-
-    public function asesores()
-    {
-        return $this->hasMany(Asesor::class);
-    }
-
-    public function tutores()
-    {
-        return $this->hasMany(Tutor::class);
-    }
-
-    public function ponentes()
-    {
-        return $this->hasMany(Ponente::class);
-    }
-
-    public function instructores()
-    {
-        return $this->hasMany(InstructorCurso::class);
     }
 }

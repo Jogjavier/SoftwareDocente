@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\DocenteController;
+use App\Http\Controllers\NivelEstudioController;
+use App\Http\Controllers\ExperienciaDocenteController;
 
 Route::get('/', function () {
     return Inertia::render('Dashboard');
@@ -35,4 +37,5 @@ Route::prefix('docentes')->name('docentes.')->group(function () {
     Route::put('/{docente}', [DocenteController::class, 'update'])->name('update');
     Route::delete('/{docente}', [DocenteController::class, 'destroy'])->name('destroy');
 });
-Route::resource('docentes.niveles', NivelEstudiosController::class);
+Route::resource('docentes.niveles', NivelEstudioController::class)->shallow();
+Route::resource('docentes.experiencias', ExperienciaDocenteController::class)->shallow();

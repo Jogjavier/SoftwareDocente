@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Docente;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Carrera;
 
 class DocenteController extends Controller
 {
@@ -26,67 +27,78 @@ class DocenteController extends Controller
             ],
         ]);
     }
+
     public function create()
     {
-        return Inertia::render('docentes/Create');
+        $carreras = Carrera::select('id', 'nombre')->get();
+        return Inertia::render('docentes/Create', [
+            'carreras' => $carreras,
+        ]);
     }
+
     public function store(Request $request)
     {
         $docenteData = $request->validate([
-        'nombres' => 'required|string',
-        'apellido_paterno' => 'required|string',
-        'apellido_materno' => 'nullable|string',
-        'fecha_nacimiento' => 'required|date',
-        'sexo' => 'required|in:M,F',
-        'rfc' => 'required|string|unique:docentes',
-        'curp' => 'required|string|unique:docentes',
-        'email' => 'required|email|unique:docentes,email',
-        'telefono' => 'nullable|string',
-        'nivel_ingles' => 'required|string',
-    ]);
+            'nombres' => 'required|string',
+            'apellido_paterno' => 'required|string',
+            'apellido_materno' => 'nullable|string',
+            'fecha_nacimiento' => 'required|date',
+            'sexo' => 'required|in:M,F',
+            'rfc' => 'required|string|unique:docentes',
+            'curp' => 'required|string|unique:docentes',
+            'email' => 'required|email|unique:docentes,email',
+            'telefono' => 'nullable|string',
+            'nivel_ingles' => 'required|string',
+        ]);
 
-    // Crear el docente
-    $docente = Docente::create($docenteData);
+        // Crear el docente
+        $docente = Docente::create($docenteData);
+        
+        // Guardar niveles si existen - SIN validación estricta
+        if ($request->has('niveles') && is_array($request->niveles)) {
+            foreach ($request->niveles as $nivelData) {
+                 if (empty($nivelData['nivel'])) {
+                    continue;
+                }
+                $nivel = [
+                    'nivel' => $nivelData['nivel'] ?? null,
+                    'siglas' => $nivelData['siglas'] ?? null,
+                    'nombre' => $nivelData['nombre'] ?? null,
+                    'cedula' => $nivelData['cedula'] ?? null,
+                    'escuela_procedencia' => $nivelData['escuela_procedencia'] ?? null,
+                ];
 
-    // Guardar niveles si existen - SIN validación estricta
-    if ($request->has('niveles') && is_array($request->niveles)) {
-        foreach ($request->niveles as $nivelData) {
-            $nivel = [
-                'nivel' => $nivelData['nivel'] ?? null,
-                'siglas' => $nivelData['siglas'] ?? null,
-                'nombre' => $nivelData['nombre'] ?? null,
-                'cedula' => $nivelData['cedula'] ?? null,
-                'escuela_procedencia' => $nivelData['escuela_procedencia'] ?? null,
-            ];
+                // Manejar archivos - verificar si es un archivo válido
+                if (isset($nivelData['titulo_path']) && $nivelData['titulo_path'] instanceof \Illuminate\Http\UploadedFile) {
+                    $nivel['titulo_path'] = $nivelData['titulo_path']->store('titulos', 'public');
+                }
+                
+                if (isset($nivelData['cedula_path']) && $nivelData['cedula_path'] instanceof \Illuminate\Http\UploadedFile) {
+                    $nivel['cedula_path'] = $nivelData['cedula_path']->store('cedulas', 'public');
+                }
 
-            // Manejar archivos - verificar si es un archivo válido
-            if (isset($nivelData['titulo_path']) && $nivelData['titulo_path'] instanceof \Illuminate\Http\UploadedFile) {
-                $nivel['titulo_path'] = $nivelData['titulo_path']->store('titulos', 'public');
-            }
-            
-            if (isset($nivelData['cedula_path']) && $nivelData['cedula_path'] instanceof \Illuminate\Http\UploadedFile) {
-                $nivel['cedula_path'] = $nivelData['cedula_path']->store('cedulas', 'public');
-            }
-
-            // Solo crear el nivel si tiene al menos el campo 'nivel'
-            if (!empty($nivel['nivel'])) {
-                $docente->niveles()->create($nivel);
+                // Solo crear el nivel si tiene al menos el campo 'nivel'
+                if (!empty($nivel['nivel'])) {
+                    $docente->niveles()->create($nivel);
+                }
             }
         }
-    }
 
-    return redirect()->route('docentes.index')->with('success', 'Docente creado exitosamente');
+        return redirect()->route('docentes.show', $docente->id)
+            ->with('success', 'Docente creado exitosamente');
 
     }
     
-    public function show($id)
+    public function show(Docente $docente)
     {
-        $docente = Docente::with('niveles')->findOrFail($id);
+        $docente->load('experiencias.carrera', 'niveles'); // 'niveles' si quieres mostrar niveles de estudio
 
-        return Inertia::render('docentes/Detalles', [
-            'docente' => $docente
+        return Inertia::render('Docentes/Detalles', [
+            'docente' => $docente,
+            'experiencias' => $docente->experiencias,
         ]);
     }
+
     public function edit(Docente $docente)
     {
         $docente->load('niveles');
@@ -142,8 +154,9 @@ class DocenteController extends Controller
             }
         }
 
-        return redirect()->route('docentes.index')->with('success', 'Docente actualizado exitosamente');
- }
+        return redirect()->route('docentes.show', $docente->id)->with('success', 'Docente actualizado exitosamente');
+    }
+
     public function destroy(Docente $docente)
     {
         $docente->delete();

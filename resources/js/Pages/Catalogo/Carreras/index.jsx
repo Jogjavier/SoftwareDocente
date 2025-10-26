@@ -57,7 +57,7 @@ export default function Index({ carreras = [], filters = {} }) {
           <thead>
             <tr className="bg-red-800">
               <th className="p-3 text-left text-white font-semibold border-r border-red-700">ID</th>
-              <th className="p-3 text-left text-white font-semibold border-r border-red-700">Nombre</th>
+              <th className="p-3 text-left text-white font-semibold border-r border-red-700">Nombre del Programa Academico</th>
               <th className="p-3 text-left text-white font-semibold border-r border-red-700">Siglas</th>
               <th className="p-3 text-center text-white font-semibold">Acciones</th>
             </tr>

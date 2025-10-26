@@ -67,7 +67,7 @@ export default function Edit({ carrera = { id: 1, nombre: "Ingeniería en Sistem
             {/* Campo Nombre */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-700">
-                Nombre de la Carrera *
+                Nombre del Programa Academico *
               </label>
               <input
                 type="text"

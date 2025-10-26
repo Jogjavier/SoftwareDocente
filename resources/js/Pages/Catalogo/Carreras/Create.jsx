@@ -24,7 +24,7 @@ export default function Create() {
       <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 border border-gray-200">
         <div className="space-y-6">
           <div>
-            <label className="block mb-2 text-gray-700 font-medium">Nombre:</label>
+            <label className="block mb-2 text-gray-700 font-medium">Nombre del Progarama Academico:</label>
             <input
               type="text"
               value={nombre}
