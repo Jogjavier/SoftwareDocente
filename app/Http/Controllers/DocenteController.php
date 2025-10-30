@@ -93,7 +93,7 @@ class DocenteController extends Controller
     {
         $docente->load('experiencias.carrera', 'niveles'); // 'niveles' si quieres mostrar niveles de estudio
 
-        return Inertia::render('Docentes/Detalles', [
+        return Inertia::render('docentes/Detalles', [
             'docente' => $docente,
             'experiencias' => $docente->experiencias,
         ]);

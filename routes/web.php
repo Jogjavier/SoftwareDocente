@@ -38,4 +38,5 @@ Route::prefix('docentes')->name('docentes.')->group(function () {
     Route::delete('/{docente}', [DocenteController::class, 'destroy'])->name('destroy');
 });
 Route::resource('docentes.niveles', NivelEstudioController::class)->shallow();
-Route::resource('docentes.experiencias', ExperienciaDocenteController::class)->shallow();
+Route::resource('docentes.experiencias', ExperienciaDocenteController::class);
+

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Inertia\Inertia; // ✅ AGREGAR ESTE IMPORT
+use Inertia\Inertia; 
 use App\Models\Carrera;
 use App\Models\Docente;
-use App\Models\ExperienciaDocente; // ✅ AGREGAR ESTE IMPORT
+use App\Models\ExperienciaDocente; 
 
 class ExperienciaDocenteController extends Controller
 {
@@ -33,8 +33,9 @@ class ExperienciaDocenteController extends Controller
         $data = $request->validate([
             'anio_ingreso' => 'required|integer',
             'carrera_id' => 'required|integer',
-            'horas_nombramiento' => 'required|integer',
-            'presidente_academia' => 'nullable|boolean',
+            'horas_nombramiento' => 'nullable|string',
+            'presidente_academia_inicio' => 'nullable|string',
+            'presidente_academia_fin' => 'nullable|string',
             'perfildeseable_path' => 'nullable|file|mimes:pdf,jpg,png',
             'perfildeseable_fecha_inicio' => 'nullable|date',
             'perfildeseable_fecha_fin' => 'nullable|date',
@@ -80,8 +81,9 @@ class ExperienciaDocenteController extends Controller
         $data = $request->validate([
             'anio_ingreso' => 'required|integer',
             'carrera_id' => 'required|integer',
-            'horas_nombramiento' => 'required|integer',
-            'presidente_academia' => 'nullable|boolean',
+            'horas_nombramiento' => 'nullable|string',
+            'presidente_academia_inicio' => 'nullable|string',
+            'presidente_academia_fin' => 'nullable|string',
             'perfildeseable_path' => 'nullable|file|mimes:pdf,jpg,png',
             'perfildeseable_fecha_inicio' => 'nullable|date',
             'perfildeseable_fecha_fin' => 'nullable|date',
