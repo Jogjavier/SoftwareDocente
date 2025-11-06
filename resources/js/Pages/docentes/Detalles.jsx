@@ -60,6 +60,16 @@ export default function Detalles({ docente, experiencias = [] }) {
             <p className="text-gray-800">{docente.nivel_ingles}</p>
           </div>
 
+          <div>
+            <p className="text-gray-600 font-semibold">Año de Ingreso:</p>
+            <p className="text-gray-800">{docente.anio_ingreso}</p>
+          </div>
+
+          <div>
+            <p className="text-gray-600 font-semibold">Departamento al que pertenece:</p>
+            <p className="text-gray-800">{docente.carrera?.nombre || "Sin asignar"}</p>
+          </div>
+
           <div className="sm:col-span-2">
             <h3 className="text-xl font-bold text-red-800 mb-4">Niveles de Estudio</h3>
             {docente.niveles && docente.niveles.length > 0 ? (
@@ -148,12 +158,6 @@ export default function Detalles({ docente, experiencias = [] }) {
                 <div key={exp.id} className="border border-gray-300 rounded-lg p-6 bg-gray-50">
                   {/* Header de la experiencia */}
                   <div className="flex justify-between items-start mb-4 pb-4 border-b border-gray-300">
-                    <div>
-                      <h3 className="text-xl font-bold text-red-800">
-                        {exp.carrera ? exp.carrera.nombre : "Sin carrera"}
-                      </h3>
-                      <p className="text-gray-600">Año de ingreso: {exp.anio_ingreso}</p>
-                    </div>
                     <div className="flex gap-2">
                       <Link
                         href={route("docentes.experiencias.edit", [docente.id, exp.id])}
@@ -353,6 +357,58 @@ export default function Detalles({ docente, experiencias = [] }) {
                             >
                               {exp.link}
                             </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {/* Ponencias */}
+                  {(exp.ponencia || exp.ponencia_inicio || exp.ponencia_fin) && (
+                    <div className="mt-4 p-4 bg-teal-50 rounded-lg">
+                      <h4 className="font-bold text-teal-800 mb-2">Ponencias</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {exp.ponencia && (
+                          <div>
+                            <p className="text-gray-600 font-semibold text-sm">Ponencia:</p>
+                            <p className="text-gray-800">{exp.ponencia}</p>
+                          </div>
+                        )}
+                        {exp.ponencia_inicio && (
+                          <div>
+                            <p className="text-gray-600 font-semibold text-sm">Fecha de Inicio de la Ponencia:</p>
+                            <p className="text-gray-800">{exp.ponencia_inicio}</p>
+                          </div>
+                        )}
+                        {exp.ponencia_fin && (
+                          <div>
+                            <p className="text-gray-600 font-semibold text-sm">Fecha de Fin de la Ponencia:</p>
+                            <p className="text-gray-800">{exp.ponencia_fin}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {/* Instructor de Curso */}
+                  {(exp.instructor || exp.instructor_inicio || exp.instructor_fin) && (
+                    <div className="mt-4 p-4 bg-teal-50 rounded-lg">
+                      <h4 className="font-bold text-teal-800 mb-2">Cursos Impartidos</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {exp.instructor && (
+                          <div>
+                            <p className="text-gray-600 font-semibold text-sm">Curso:</p>
+                            <p className="text-gray-800">{exp.instructor}</p>
+                          </div>
+                        )}
+                        {exp.instructor_inicio && (
+                          <div>
+                            <p className="text-gray-600 font-semibold text-sm">Fecha de Inicio del Curso:</p>
+                            <p className="text-gray-800">{exp.instructor_inicio}</p>
+                          </div>
+                        )}
+                        {exp.instructor_fin && (
+                          <div>
+                            <p className="text-gray-600 font-semibold text-sm">Fecha de Fin del Curso:</p>
+                            <p className="text-gray-800">{exp.instructor_fin}</p>
                           </div>
                         )}
                       </div>

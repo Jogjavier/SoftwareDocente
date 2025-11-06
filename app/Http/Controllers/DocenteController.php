@@ -49,6 +49,9 @@ class DocenteController extends Controller
             'email' => 'required|email|unique:docentes,email',
             'telefono' => 'nullable|string',
             'nivel_ingles' => 'required|string',
+            'anio_ingreso' => 'required|integer',
+            'carrera_id' => 'required|integer',
+
         ]);
 
         // Crear el docente
@@ -91,20 +94,22 @@ class DocenteController extends Controller
     
     public function show(Docente $docente)
     {
-        $docente->load('experiencias.carrera', 'niveles'); // 'niveles' si quieres mostrar niveles de estudio
-
+        $docente->load('experiencias', 'niveles', 'carrera'); // 'niveles' si quieres mostrar niveles de estudio
+        $carreras = Carrera::select('id', 'nombre')->get();
         return Inertia::render('docentes/Detalles', [
             'docente' => $docente,
             'experiencias' => $docente->experiencias,
+            'carreras' => $carreras,
         ]);
     }
 
     public function edit(Docente $docente)
     {
         $docente->load('niveles');
-
+        $carreras = Carrera::select('id', 'nombre')->get();
         return Inertia::render('docentes/Edit', [
-            'docente' => $docente
+            'docente' => $docente,
+            'carreras' => $carreras,
         ]);
     }
     public function update(Request $request, Docente $docente)
@@ -121,6 +126,8 @@ class DocenteController extends Controller
         'telefono' => 'nullable|string',
         'nivel_ingles' => 'required|string',
         'niveles' => 'array',
+        'anio_ingreso' => 'required|integer',
+        'carrera_id' => 'required|integer',
         ]);
 
         $docente->update($data);

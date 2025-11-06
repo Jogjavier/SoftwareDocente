@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FaGraduationCap, FaSave, FaArrowLeft } from "react-icons/fa";
 import { Inertia } from "@inertiajs/inertia";
 
-export default function Edit({ docente }) {
+export default function Edit({ docente, carreras }) {
   const [form, setForm] = useState({
     nombres: docente?.nombres || "",
     apellido_paterno: docente?.apellido_paterno || "",
@@ -14,6 +14,8 @@ export default function Edit({ docente }) {
     email: docente?.email || "",
     telefono: docente?.telefono || "",
     nivel_ingles: docente?.nivel_ingles || "Bajo",
+    anio_ingreso: docente?.anio_ingreso || "",
+    carrera_id: docente?.carrera_id || "",
     niveles: docente?.niveles?.map(nivel => ({
       id: nivel.id, 
       nivel: nivel.nivel, 
@@ -46,7 +48,6 @@ export default function Edit({ docente }) {
     });
   };
 
-  // ✅ CORREGIDO: Función addNivel con el parámetro correcto
   const addNivel = (tipo) => {
     setForm({
       ...form,
@@ -54,7 +55,7 @@ export default function Edit({ docente }) {
         ...form.niveles,
         {
           id: null, 
-          nivel: tipo, // ✅ Cambiado de 'tipoNivel' a 'tipo'
+          nivel: tipo, 
           siglas: "",
           nombre: "",
           escuela_procedencia: "",
@@ -68,7 +69,6 @@ export default function Edit({ docente }) {
     });
   };
 
-  // ✅ AÑADIR: Función handleFileChange que falta
   const handleFileChange = (index, field, file) => {
     const updatedNiveles = [...form.niveles];
     updatedNiveles[index][field] = file;
@@ -101,6 +101,8 @@ export default function Edit({ docente }) {
     formData.append("email", form.email);
     formData.append("telefono", form.telefono);
     formData.append("nivel_ingles", form.nivel_ingles);
+    formData.append("anio_ingreso",form.anio_ingreso);
+    formData.append("carrera_id",form.carrera_id);
     formData.append("_method", "PUT");
 
     // Datos de niveles
@@ -324,6 +326,42 @@ export default function Edit({ docente }) {
               <option value="Alto">Alto</option>
             </select>
           </div>
+
+          <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Año de Ingreso *
+                </label>
+                <input
+                  type="number"
+                  name="anio_ingreso"
+                  value={form.anio_ingreso}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Carrera *
+                </label>
+                <select
+                  name="carrera_id"
+                  value={form.carrera_id}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  required
+                  disabled={loading}
+                >
+                  <option value="">Seleccionar carrera</option>
+                  {carreras.map((carrera) => (
+                    <option key={carrera.id} value={carrera.id}>
+                      {carrera.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
           {/* Lista de niveles añadidos */}
           <div className="border-t pt-6">

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia; 
-use App\Models\Carrera;
 use App\Models\Docente;
 use App\Models\ExperienciaDocente; 
 
@@ -20,19 +19,15 @@ class ExperienciaDocenteController extends Controller
 
     public function create(Docente $docente)
     {
-        $carreras = Carrera::select('id', 'nombre')->get();
-
+        $docente = Docente::findOrFail($docente->id);
         return Inertia::render('experienciadocente/Create', [
             'docente' => $docente,
-            'carreras' => $carreras,
         ]);
     }
 
     public function store(Request $request, Docente $docente)
     {
         $data = $request->validate([
-            'anio_ingreso' => 'required|integer',
-            'carrera_id' => 'required|integer',
             'horas_nombramiento' => 'nullable|string',
             'presidente_academia_inicio' => 'nullable|string',
             'presidente_academia_fin' => 'nullable|string',
@@ -72,15 +67,12 @@ class ExperienciaDocenteController extends Controller
         return Inertia::render('experienciadocente/Edit', [
             'docente' => $docente,
             'experiencia' => $experiencia,
-            'carreras' => $carreras,
         ]);
     }
 
     public function update(Request $request, Docente $docente, ExperienciaDocente $experiencia)
     {
         $data = $request->validate([
-            'anio_ingreso' => 'required|integer',
-            'carrera_id' => 'required|integer',
             'horas_nombramiento' => 'nullable|string',
             'presidente_academia_inicio' => 'nullable|string',
             'presidente_academia_fin' => 'nullable|string',
@@ -101,6 +93,12 @@ class ExperienciaDocenteController extends Controller
             'fecha_publicacion' => 'nullable|date',
             'nombre_articulo' => 'nullable|string',
             'link' => 'nullable|url',
+            'ponencia' => 'nullable|string',
+            'ponencia_inicio' => 'nullable|date',
+            'ponencia_fin' => 'nullable|date',
+            'instructor' => 'nullable|string',
+            'instructor_inicio' => 'nullable|date',
+            'instructor_fin' => 'nullable|date',
         ]);
 
         if ($request->hasFile('perfildeseable_path')) {

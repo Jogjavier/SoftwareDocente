@@ -22,6 +22,8 @@ class Docente extends Model
         'email',
         'telefono',
         'nivel_ingles',
+        'anio_ingreso',
+        'carrera_id',
     ];
 
     // Relaciones
@@ -33,5 +35,10 @@ class Docente extends Model
     public function experiencias()
     {
         return $this->hasMany(ExperienciaDocente::class);
+    }
+
+    public function carrera()
+    {
+        return $this->belongsTo(Carrera::class);
     }
 }

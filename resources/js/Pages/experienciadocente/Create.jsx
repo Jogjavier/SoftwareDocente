@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { Inertia } from "@inertiajs/inertia";
 import { Link } from "@inertiajs/inertia-react";
 
-export default function Create({ docente, carreras }) {
+export default function Create({ docente }) {
   const [formData, setFormData] = useState({
-    anio_ingreso: "",
-    carrera_id: "",
     horas_nombramiento: "",
     presidente_academia_inicio: "",
     presidente_academia_fin: "",
@@ -25,6 +23,12 @@ export default function Create({ docente, carreras }) {
     fecha_publicacion: "",
     nombre_articulo: "",
     link: "",
+    ponencia: "",
+    ponencia_inicio: "",
+    ponencia_fin: "",
+    instructor: "",
+    instructor_inicio: "",
+    instructor_fin: "",
   });
 
   const [perfilDeseableFile, setPerfilDeseableFile] = useState(null);
@@ -80,41 +84,6 @@ export default function Create({ docente, carreras }) {
           {/* Información Básica */}
           <div className="mb-6">
             <h3 className="text-xl font-bold text-red-800 mb-4">Información Básica</h3>
-            
-            <div className="mb-4">
-              <label className="block text-gray-700 font-semibold mb-2">
-                Año de ingreso:
-              </label>
-              <input
-                type="number"
-                value={formData.anio_ingreso}
-                onChange={(e) => handleChange("anio_ingreso", e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
-                placeholder="2024"
-                min="1900"
-                max="2100"
-                required
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-gray-700 font-semibold mb-2">
-                Departamento al que pertenece:
-              </label>
-              <select
-                value={formData.carrera_id}
-                onChange={(e) => handleChange("carrera_id", e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
-                required
-              >
-                <option value="">Seleccione una carrera</option>
-                {carreras.map((carrera) => (
-                  <option key={carrera.id} value={carrera.id}>
-                    {carrera.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
 
             <div className="mb-4">
               <label className="block text-gray-700 font-semibold mb-2">
@@ -396,6 +365,71 @@ export default function Create({ docente, carreras }) {
                 placeholder="https://..."
               />
             </div>
+          </div>
+          {/* Ponencias */}
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-red-800 mb-4">Ponencias</h3>
+            <div className="mb-4">
+              <label className="block mb-2 text-gray-700 font-medium">Ponencia:</label>
+              <input
+                type="text"
+                value={formData.ponencia}
+                onChange={(e) => handleChange("ponencia", e.target.value)}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-2 text-gray-700 font-medium">Fecha de Inicio de Ponencia:</label>
+              <input
+                type="date"
+                value={formData.ponencia_inicio}
+                onChange={(e) => handleChange("ponencia_inicio", e.target.value)}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-2 text-gray-700 font-medium">Fecha de Término de Ponencia:</label>
+              <input
+                type="date"
+                value={formData.ponencia_fin}
+                onChange={(e) => handleChange("ponencia_fin", e.target.value)}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            
+          </div>
+
+          {/* Instructor */}
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-red-800 mb-4">Cursos Impartidos</h3>
+            <div className="mb-4">
+              <label className="block mb-2 text-gray-700 font-medium">Curso:</label>
+              <input 
+                type="text"
+                value={formData.instructor}
+                onChange={(e) => handleChange("instructor", e.target.value)}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-2 text-gray-700 font-medium">Fecha de Inicio del Curso:</label>
+              <input
+                type="date"
+                value={formData.instructor_inicio}
+                onChange={(e) => handleChange("instructor_inicio", e.target.value)}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-2 text-gray-700 font-medium">Fecha de Término del Curso:</label>
+              <input
+                type="date"
+                value={formData.instructor_fin}
+                onChange={(e) => handleChange("instructor_fin", e.target.value)}
+                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            
           </div>
 
           {/* Botones */}

@@ -19,6 +19,7 @@ const modules = [
     submenus: [
       { name: "Registrar", route: "/docentes/create" },
       { name: "Ver docentes", route: "/docentes/index" },
+      { name: "Activar Docente,", route: "/docentes/activar" },
     ],
   },
   {

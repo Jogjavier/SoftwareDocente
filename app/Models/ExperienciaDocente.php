@@ -10,8 +10,6 @@ class ExperienciaDocente extends Model
 
     protected $fillable = [
         'docente_id',
-        'anio_ingreso',
-        'carrera_id',
         'horas_nombramiento',
         'presidente_academia_inicio',
         'presidente_academia_fin',
@@ -32,6 +30,12 @@ class ExperienciaDocente extends Model
         'fecha_publicacion',
         'nombre_articulo',
         'link',
+        'ponencia',
+        'ponencia_inicio',
+        'ponencia_fin',
+        'instructor',
+        'instructor_inicio',
+        'instructor_fin',
     ];
 
     public function docente()
@@ -39,8 +43,5 @@ class ExperienciaDocente extends Model
         return $this->belongsTo(Docente::class);
     }
     
-    public function carrera()
-    {
-        return $this->belongsTo(Carrera::class);
-    }
+    
 }

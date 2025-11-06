@@ -4,8 +4,6 @@ import { Inertia } from "@inertiajs/inertia";
 
 export default function EditExperiencia({ docente, experiencia, carreras = [] }) {
   const [form, setForm] = useState({
-    anio_ingreso: experiencia?.anio_ingreso || "",
-    carrera_id: experiencia?.carrera_id || "",
     horas_nombramiento: experiencia?.horas_nombramiento || "",
     presidente_academia_inicio: experiencia?.presidente_academia_inicio || "",
     presidente_academia_fin: experiencia?.presidente_academia_fin || "",
@@ -27,6 +25,12 @@ export default function EditExperiencia({ docente, experiencia, carreras = [] })
     fecha_publicacion: experiencia?.fecha_publicacion || "",
     nombre_articulo: experiencia?.nombre_articulo || "",
     link: experiencia?.link || "",
+    ponencia: experiencia?.ponencia || "",
+    ponencia_inicio: experiencia?.ponencia_inicio || "",
+    ponencia_fin: experiencia?.ponencia_fin || "",
+    instructor: experiencia?.instructor || "",
+    instructor_inicio: experiencia?.instructor_inicio || "",
+    instructor_fin: experiencia?.instructor_fin || "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -111,41 +115,6 @@ export default function EditExperiencia({ docente, experiencia, carreras = [] })
               Información General
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Año de Ingreso *
-                </label>
-                <input
-                  type="number"
-                  name="anio_ingreso"
-                  value={form.anio_ingreso}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                  required
-                  disabled={loading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Carrera *
-                </label>
-                <select
-                  name="carrera_id"
-                  value={form.carrera_id}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                  required
-                  disabled={loading}
-                >
-                  <option value="">Seleccionar carrera</option>
-                  {carreras.map((carrera) => (
-                    <option key={carrera.id} value={carrera.id}>
-                      {carrera.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -513,7 +482,100 @@ export default function EditExperiencia({ docente, experiencia, carreras = [] })
               </div>
             </div>
           </div>
-
+          { /* Ponencias */}
+          <div>
+            <h2 className="text-2xl font-bold text-red-800 mb-6">
+              Ponencias
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Ponencia
+                </label>
+                <input
+                  type="text"
+                  name="ponencia"
+                  value={form.ponencia}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Fecha de Inicio de Ponencia:
+                </label>
+                <input
+                  type="date"
+                  name="ponencia_inicio"
+                  value={form.ponencia_inicio}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Fecha de Fin de Ponencia:
+                </label>
+                <input
+                  type="date"
+                  name="ponencia_fin"
+                  value={form.ponencia_fin}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+          </div>
+          { /* Instructor de curso */}
+          <div>
+            <h2 className="text-2xl font-bold text-red-800 mb-6">
+              Cursos Impartidos
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Curso:
+                </label>
+                <input
+                  type="text"
+                  name="instructor"
+                  value={form.instructor}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Fecha de Inicio del Curso:
+                </label>
+                <input
+                  type="date"
+                  name="instructor_inicio"
+                  value={form.instructor_inicio}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Fecha de Fin del Curso:
+                </label>
+                <input
+                  type="date"
+                  name="instructor_fin"
+                  value={form.instructor_fin}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+          </div>
           {/* Botones */}
           <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t">
             <button

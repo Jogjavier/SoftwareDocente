@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Inertia } from "@inertiajs/inertia";
 
-export default function Create() {
+export default function Create({ carreras}) {
   // Docente data
   const [nombres, setNombres] = useState("");
   const [apellido_paterno, setApellidoPaterno] = useState("");
@@ -13,6 +13,8 @@ export default function Create() {
   const [email, setEmail] = useState("");
   const [telefono, setTelefono] = useState("");
   const [nivel_ingles, setNivelIngles] = useState("");
+  const [anio_ingreso, setAnioIngreso] = useState("");
+  const [carrera_id, setCarreraId] = useState("");
 
   // Niveles data
   const [niveles, setNiveles] = useState([]);
@@ -65,6 +67,8 @@ export default function Create() {
     formData.append("email", email);
     formData.append("telefono", telefono);
     formData.append("nivel_ingles", nivel_ingles);
+    formData.append("anio_ingreso", anio_ingreso);
+    formData.append("carrera_id", carrera_id);
 
     // Add niveles data
     niveles.forEach((nivel, index) => {
@@ -220,6 +224,40 @@ export default function Create() {
                   <option value="Alto">Alto</option>
                 </select>
               </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Año de ingreso:
+                </label>
+                <input
+                  type="number"
+                  value={anio_ingreso}
+                  onChange={(e) => setAnioIngreso(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
+                  placeholder="2024"
+                  min="1900"
+                  max="2100"
+                  required
+                />
+              </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 font-semibold mb-2">
+                Departamento al que pertenece:
+              </label>
+              <select
+                value={carrera_id}
+                onChange={(e) => setCarreraId(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
+                required
+              >
+                <option value="">Seleccione una carrera</option>
+                {carreras.map((carrera) => (
+                  <option key={carrera.id} value={carrera.id}>
+                    {carrera.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
             </div>
           </div>
 
