@@ -41,4 +41,19 @@ class Docente extends Model
     {
         return $this->belongsTo(Carrera::class);
     }
+
+     public function getNombreCompletoAttribute()
+    {
+        return trim("{$this->nombres} {$this->apellido_paterno} {$this->apellido_materno}");
+    }
+
+    public function cursosInternos()
+    {
+        return $this->belongsToMany(
+            CursoInterno::class, 
+            'curso_interno_docente', 
+            'docente_id', 
+            'curso_interno_id'
+        );
+    }
 }

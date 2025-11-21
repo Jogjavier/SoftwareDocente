@@ -19,7 +19,7 @@ const modules = [
     submenus: [
       { name: "Registrar", route: "/docentes/create" },
       { name: "Ver docentes", route: "/docentes/index" },
-      { name: "Activar Docente,", route: "/docentes/activar" },
+      { name: "Activar Docente", route: "/docentes/activar" },
     ],
   },
   {
@@ -36,8 +36,10 @@ const modules = [
     color: "burgundy",
     icon: <FaChalkboardTeacher size={40} className="text-red-800" />,
     submenus: [
-      { name: "Dar de alta", route: "/capacitaciones/create" },
-      { name: "Ver Capacitaciones", route: "/capacitaciones/index" },
+      { name: "Registrar Curso Interno", route: "/capacitaciones/cursointerno/create" },
+      { name: "Registrar Curso Externo", route: "/capacitaciones/cursoexterno/create" },
+      { name: "Ver Capacitaciones y Constancias", route: "/capacitaciones/constancia/index" },
+      { name: "Generar Constancia", route: "/capacitaciones/constancia/create" },
     ],
   },
 ];

@@ -8,6 +8,9 @@ use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\NivelEstudioController;
 use App\Http\Controllers\ExperienciaDocenteController;
+use App\Http\Controllers\CursoInternoController;
+use App\Http\Controllers\CursoExternoController;
+use App\Http\Controllers\ConstanciaController;
 
 Route::get('/', function () {
     return Inertia::render('Dashboard');
@@ -39,4 +42,14 @@ Route::prefix('docentes')->name('docentes.')->group(function () {
 });
 Route::resource('docentes.niveles', NivelEstudioController::class)->shallow();
 Route::resource('docentes.experiencias', ExperienciaDocenteController::class);
+Route::resource('capacitaciones/cursointerno', CursoInternoController::class);
+Route::resource('capacitaciones/cursoexterno', CursoExternoController::class);
 
+Route::prefix('capacitaciones/constancia')->name('capacitaciones.constancia.')->group(function () {
+    Route::get('/index', [ConstanciaController::class, 'index'])->name('index');
+    Route::get('/create', [ConstanciaController::class, 'create'])->name('create');
+    Route::post('/', [ConstanciaController::class, 'store'])->name('store');
+    Route::get('/{constancia}/edit', [ConstanciaController::class, 'edit'])->name('edit');
+    Route::put('/{constancia}', [ConstanciaController::class, 'update'])->name('update');
+    Route::delete('/{constancia}', [ConstanciaController::class, 'destroy'])->name('destroy');
+});
