@@ -56,4 +56,9 @@ class Docente extends Model
             'curso_interno_id'
         );
     }
+
+    public function evaluaciones()
+    {
+        return $this->hasMany(\App\Models\EvaluacionDocente::class);
+    }
 }

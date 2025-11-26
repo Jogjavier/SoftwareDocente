@@ -11,6 +11,7 @@ use App\Http\Controllers\ExperienciaDocenteController;
 use App\Http\Controllers\CursoInternoController;
 use App\Http\Controllers\CursoExternoController;
 use App\Http\Controllers\ConstanciaController;
+use App\Http\Controllers\EvaluacionDocenteController;
 
 Route::get('/', function () {
     return Inertia::render('Dashboard');
@@ -45,6 +46,7 @@ Route::resource('docentes.experiencias', ExperienciaDocenteController::class);
 Route::resource('capacitaciones/cursointerno', CursoInternoController::class);
 Route::resource('capacitaciones/cursoexterno', CursoExternoController::class);
 
+// Constancias
 Route::prefix('capacitaciones/constancia')->name('capacitaciones.constancia.')->group(function () {
     Route::get('/index', [ConstanciaController::class, 'index'])->name('index');
     Route::get('/create', [ConstanciaController::class, 'create'])->name('create');
@@ -52,4 +54,19 @@ Route::prefix('capacitaciones/constancia')->name('capacitaciones.constancia.')->
     Route::get('/{constancia}/edit', [ConstanciaController::class, 'edit'])->name('edit');
     Route::put('/{constancia}', [ConstanciaController::class, 'update'])->name('update');
     Route::delete('/{constancia}', [ConstanciaController::class, 'destroy'])->name('destroy');
+});
+
+// Evaluacion Docente
+Route::prefix('evaluaciones/evaluaciondocente')->name('evaluaciones.evaluaciondocente.')->group(function () {
+    Route::get('/', [EvaluacionDocenteController::class, 'index'])->name('index'); // Cambié '/index' a '/'
+    Route::get('/create', [EvaluacionDocenteController::class, 'create'])->name('create');
+    Route::post('/', [EvaluacionDocenteController::class, 'store'])->name('store');
+    Route::get('/por-docente', [EvaluacionDocenteController::class, 'porDocente'])->name('porDocente');
+    Route::get('/por-carrera', [EvaluacionDocenteController::class, 'porCarrera'])->name('porCarrera');
+    Route::get('/general', [EvaluacionDocenteController::class, 'general'])->name('general');
+    
+    // Rutas para obtener datos (API endpoints)
+    Route::get('/data/docente/{id}', [EvaluacionDocenteController::class, 'dataPorDocente'])->name('data.docente');
+    Route::get('/data/carrera/{carreraId}', [EvaluacionDocenteController::class, 'dataPorCarrera'])->name('data.carrera');
+    Route::get('/data/general', [EvaluacionDocenteController::class, 'dataGeneral'])->name('data.general');
 });

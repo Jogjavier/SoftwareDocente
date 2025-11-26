@@ -27,7 +27,8 @@ const modules = [
     color: "burgundy",
     icon: <FaClipboardCheck size={40} className="text-red-800" />,
     submenus: [
-      { name: "Evaluación docente", route: "/evaluaciones/docente" },
+      { name: "Evaluación docente", route: "/evaluaciones/evaluaciondocente" },
+      { name: "Registrar evaluación docente", route: "/evaluaciones/evaluaciondocente/create" },
       { name: "Evaluación departamental", route: "/evaluaciones/departamental" },
     ],
   },
