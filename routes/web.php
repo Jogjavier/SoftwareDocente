@@ -61,6 +61,9 @@ Route::prefix('evaluaciones/evaluaciondocente')->name('evaluaciones.evaluaciondo
     Route::get('/', [EvaluacionDocenteController::class, 'index'])->name('index'); // Cambié '/index' a '/'
     Route::get('/create', [EvaluacionDocenteController::class, 'create'])->name('create');
     Route::post('/', [EvaluacionDocenteController::class, 'store'])->name('store');
+    Route::get('/{evaluaciondocente}/edit', [EvaluacionDocenteController::class, 'edit'])->name('edit');
+    Route::put('/{evaluaciondocente}', [EvaluacionDocenteController::class, 'update'])->name('update');
+    Route::delete('/{evaluaciondocente}', [EvaluacionDocenteController::class, 'destroy'])->name('destroy');
     Route::get('/por-docente', [EvaluacionDocenteController::class, 'porDocente'])->name('porDocente');
     Route::get('/por-carrera', [EvaluacionDocenteController::class, 'porCarrera'])->name('porCarrera');
     Route::get('/general', [EvaluacionDocenteController::class, 'general'])->name('general');

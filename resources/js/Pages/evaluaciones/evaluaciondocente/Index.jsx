@@ -1,7 +1,8 @@
 import { Link } from "@inertiajs/react";
 import { BarChart3, Users, Building2, TrendingUp } from "lucide-react";
+import { router } from '@inertiajs/react';
 
-export default function Index() {
+export default function Index( {evaluaciones}) {
     const cards = [
         {
             title: "Evaluación por Docente",
@@ -31,15 +32,26 @@ export default function Index() {
             stats: "Vista institucional completa"
         }
     ];
+    const handleDelete = (id) => {
+        if (window.confirm('¿Estás seguro de que deseas eliminar esta evaluación?')) {
+            router.delete(`/evaluaciones/evaluaciondocente/${id}`, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    alert('Evaluación eliminada exitosamente');
+                },
+                onError: (errors) => {
+                    console.error('Error:', errors);
+                    alert('Hubo un error al eliminar la evaluación');
+                }
+            });
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
             {/* Encabezado Principal */}
             <div className="max-w-7xl mx-auto mb-12">
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-red-800 to-red-900 rounded-2xl shadow-lg mb-4">
-                        <BarChart3 className="w-10 h-10 text-yellow-400" />
-                    </div>
                     <h1 className="text-5xl font-bold text-gray-800 mb-3">
                         Sistema de Evaluación Docente
                     </h1>
@@ -53,15 +65,17 @@ export default function Index() {
                     <div className="h-1 w-32 bg-gradient-to-r from-transparent via-red-800 to-transparent"></div>
                 </div>
 
-                {/* Botón para crear nueva evaluación */}
-                <div className="text-center mb-12">
-                    <Link
-                        href="/evaluaciones/evaluaciondocente/create"
-                        className="inline-flex items-center gap-3 bg-gradient-to-r from-red-800 to-red-900 text-yellow-400 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                    >
-                        <span className="text-2xl">+</span>
-                        Nueva Evaluación Docente
-                    </Link>
+                {/* Contenedor de los botones */}
+                <div className="flex justify-center gap-6 mb-12">
+
+                {/* Botón: Crear Evaluación */}
+                <Link
+                    href="/evaluaciones/evaluaciondocente/create"
+                    className="px-6 py-3 bg-green-700 text-white font-semibold rounded-lg shadow-md hover:bg-green-800 transition"
+                >
+                    Nueva Evaluación
+                </Link>
+
                 </div>
             </div>
 
@@ -127,31 +141,64 @@ export default function Index() {
                         );
                     })}
                 </div>
-
-                {/* Información adicional */}
-                <div className="mt-12 bg-white rounded-2xl shadow-lg p-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                        <div>
-                            <div className="text-4xl font-bold text-red-800 mb-2">10</div>
-                            <div className="text-gray-600">Criterios de Evaluación</div>
-                        </div>
-                        <div>
-                            <div className="text-4xl font-bold text-red-800 mb-2">360°</div>
-                            <div className="text-gray-600">Análisis Completo</div>
-                        </div>
-                        <div>
-                            <div className="text-4xl font-bold text-red-800 mb-2">Real-time</div>
-                            <div className="text-gray-600">Datos Actualizados</div>
-                        </div>
-                    </div>
-                </div>
-
+                
                 {/* Footer informativo */}
                 <div className="mt-8 text-center">
                     <p className="text-gray-500 text-sm">
                         Los reportes incluyen tablas detalladas y gráficas interactivas para un análisis profundo
                     </p>
                 </div>
+                {/* LISTA DE EVALUACIONES */}
+<div className="max-w-7xl mx-auto mt-10">
+    <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+        Evaluaciones Registradas
+    </h2>
+
+    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <table className="w-full text-left">
+            <thead className="bg-gray-100 text-gray-600">
+                <tr>
+                    <th className="p-3">Docente</th>
+                    <th className="p-3">Carrera</th>
+                    <th className="p-3">Semestre</th>
+                    <th className="p-3 text-center">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {evaluaciones.map((evaluacion) => (
+                    <tr key={evaluacion.id} className="border-b hover:bg-gray-50">
+                        <td className="p-3">
+                        {evaluacion.docente && `${evaluacion.docente.nombres} ${evaluacion.docente.apellido_paterno} ${evaluacion.docente.apellido_materno}`}
+                        </td>
+                        <td className="p-3">{evaluacion.carrera?.nombre}</td>
+                        <td className="p-3">{evaluacion.semestre}</td>
+
+                        <td className="p-3 flex justify-center gap-4">
+
+                            {/* EDITAR */}
+                            <Link
+                                href={`/evaluaciones/evaluaciondocente/${evaluacion.id}/edit`}
+                                className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition"
+                            >
+                                Editar
+                            </Link>
+
+                            {/* ELIMINAR */}
+                            <button
+                                onClick={() => handleDelete(evaluacion.id)}
+                                className="px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition"
+                            >
+                                Eliminar
+                            </button>
+
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+</div>
             </div>
         </div>
     );

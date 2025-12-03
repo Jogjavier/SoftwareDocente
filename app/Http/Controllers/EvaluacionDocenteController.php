@@ -13,7 +13,9 @@ class EvaluacionDocenteController extends Controller
 {
     public function index()
     {
-        return Inertia::render('evaluaciones/evaluaciondocente/Index');
+        return Inertia::render('evaluaciones/evaluaciondocente/Index', [
+        'evaluaciones' => EvaluacionDocente::with(['docente', 'carrera'])->get(),
+        ]);
     }
 
     public function porDocente()
@@ -152,7 +154,50 @@ class EvaluacionDocenteController extends Controller
     $evaluacion = EvaluacionDocente::create($validatedData);
 
     return redirect()
-        ->route('docentes.show', $validatedData['docente_id'])
+        ->route('evaluaciones.evaluaciondocente.index')
         ->with('success', 'Evaluación guardada exitosamente.');
+    }
+
+    public function edit (Request $request, EvaluacionDocente $evaluaciondocente)
+    {
+        return Inertia::render('evaluaciones/evaluaciondocente/Edit', [
+            'docentes' => Docente::all(),
+            'carreras' => Carrera::all(),
+            'evaluacion' => $evaluaciondocente, 
+        ]);
+    }
+
+    public function update(Request $request, EvaluacionDocente $evaluaciondocente)
+    {
+        $validatedData = $request->validate([
+        'docente_id' => 'required|exists:docentes,id',
+        'carrera_id' => 'required|exists:carreras,id',
+        'semestre'   => 'required|string|max:20',
+
+        'dominio_asignatura'   => 'required|numeric|min:1|max:10',
+        'planificacion_curso'   => 'required|numeric|min:1|max:10',
+        'ambiente_aprendizaje' => 'required|numeric|min:1|max:10',
+        'estrategias_metodos'   => 'required|numeric|min:1|max:10',
+        'motivacion'            => 'required|numeric|min:1|max:10',
+        'evaluacion'            => 'required|numeric|min:1|max:10',
+        'comunicacion'          => 'required|numeric|min:1|max:10',
+        'gestion_recurso'       => 'required|numeric|min:1|max:10',
+        'tecnologias'           => 'required|numeric|min:1|max:10',
+        'satisfaccion'          => 'required|numeric|min:1|max:10',
+        'resultado_global'      => 'required|numeric|min:1|max:10',
+    ]);
+
+    $evaluaciondocente->update($validatedData);
+
+    return redirect()
+        ->route('evaluaciones.evaluaciondocente.index')
+        ->with('success', 'Evaluación guardada exitosamente.');
+    }
+
+    public function destroy(EvaluacionDocente $evaluaciondocente)
+    {
+        $evaluaciondocente->delete();
+
+        return redirect()->route('evaluaciones.evaluaciondocente.index')->with('success', 'Evaluacion Docente eliminada exitosamente');
     }
 }

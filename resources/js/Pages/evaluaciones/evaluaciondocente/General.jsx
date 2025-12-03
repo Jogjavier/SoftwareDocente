@@ -163,22 +163,21 @@ export default function General() {
                 </h2>
                 {promediosSemestre.length > 0 ? (
                   <ResponsiveContainer width="100%" height={350}>
-                    <LineChart data={promediosSemestre}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="semestre" />
-                      <YAxis domain={[0, 10]} />
-                      <Tooltip />
-                      <Legend />
-                      <Line 
-                        type="monotone" 
-                        dataKey="promedio" 
-                        stroke="#16a34a" 
-                        strokeWidth={3}
-                        name="Promedio General"
-                        dot={{ fill: '#16a34a', r: 5 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+      <BarChart data={promediosSemestre}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="semestre" />
+        <YAxis domain={[0, 10]} />
+        <Tooltip />
+        <Legend />
+
+        <Bar
+          dataKey="promedio"
+          name="Promedio General"
+          fill="#16a34a"
+          radius={[6, 6, 0, 0]} // Bordes superiores redondeados
+        />
+      </BarChart>
+    </ResponsiveContainer>
                 ) : (
                   <p className="text-gray-500 text-center py-12">No hay datos disponibles</p>
                 )}
@@ -209,12 +208,18 @@ export default function General() {
                         let evaluacion = "Excelente";
                         let colorClass = "text-green-600 bg-green-50";
                         
-                        if (promedio < 7) {
-                          evaluacion = "Necesita Mejora";
+                        if (promedio < 3.25) {
+                          evaluacion = "Insuficiente";
                           colorClass = "text-red-600 bg-red-50";
-                        } else if (promedio < 8.5) {
+                        } else if (promedio < 3.75) {
+                          evaluacion = "Suficiente";
+                          colorClass = "text-orange-600 bg-orange-50";
+                        } else if (promedio < 4.25) {
                           evaluacion = "Bueno";
                           colorClass = "text-yellow-600 bg-yellow-50";
+                        } else if (promedio < 4.75) {
+                          evaluacion = "Notable";
+                          colorClass = "text-blue-600 bg-blue-50";
                         }
 
                         return (

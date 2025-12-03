@@ -1,28 +1,25 @@
 import { useState, useEffect } from "react";
-import { usePage } from "@inertiajs/react";
-import { Inertia } from "@inertiajs/inertia";
+import { Inertia } from '@inertiajs/inertia';
 
-export default function Create() {
-    const { docentes, carreras } = usePage().props;
+export default function Edit({ evaluacion, docentes, carreras }) {
 
-    const [carrera_id, setCarreraId] = useState("");
-    const [docente_id, setDocenteId] = useState("");
+    const [carrera_id, setCarreraId] = useState(evaluacion.carrera_id ?? "");
+    const [docente_id, setDocenteId] = useState(evaluacion.docente_id ?? "");
 
-    // Campos de evaluación
-    const [semestre, setSemestre] = useState("");
-    const [dominio_asignatura, setDominioAsignatura] = useState("");
-    const [planificacion_curso, setPlanificacionCurso] = useState("");
-    const [ambiente_aprendizaje, setAmbienteAprendizaje] = useState("");
-    const [estrategias_metodos, setEstrategiasMetodos] = useState("");
-    const [motivacion, setMotivacion] = useState("");
-    const [evaluacion, setEvaluacion] = useState("");
-    const [comunicacion, setComunicacion] = useState("");
-    const [gestion_recurso, setGestionRecurso] = useState("");
-    const [tecnologias, setTecnologias] = useState("");
-    const [satisfaccion, setSatisfaccion] = useState("");
-    const [resultado_global, setResultadoGlobal] = useState("");
+    const [semestre, setSemestre] = useState(evaluacion.semestre ?? "");
+    const [dominio_asignatura, setDominioAsignatura] = useState(evaluacion.dominio_asignatura ?? "");
+    const [planificacion_curso, setPlanificacionCurso] = useState(evaluacion.planificacion_curso ?? "");
+    const [ambiente_aprendizaje, setAmbienteAprendizaje] = useState(evaluacion.ambiente_aprendizaje ?? "");
+    const [estrategias_metodos, setEstrategiasMetodos] = useState(evaluacion.estrategias_metodos ?? "");
+    const [motivacion, setMotivacion] = useState(evaluacion.motivacion ?? "");
+    const [evaluacionCampo, setEvaluacionCampo] = useState(evaluacion.evaluacion ?? "");
+    const [comunicacion, setComunicacion] = useState(evaluacion.comunicacion ?? "");
+    const [gestion_recurso, setGestionRecurso] = useState(evaluacion.gestion_recurso ?? "");
+    const [tecnologias, setTecnologias] = useState(evaluacion.tecnologias ?? "");
+    const [satisfaccion, setSatisfaccion] = useState(evaluacion.satisfaccion ?? "");
+    const [resultado_global, setResultadoGlobal] = useState(evaluacion.resultado_global ?? "");
 
-    // Calcular resultado global automáticamente
+    // Cálculo del resultado global
     useEffect(() => {
         const valores = [
             dominio_asignatura,
@@ -30,12 +27,14 @@ export default function Create() {
             ambiente_aprendizaje,
             estrategias_metodos,
             motivacion,
-            evaluacion,
+            evaluacionCampo,
             comunicacion,
             gestion_recurso,
             tecnologias,
             satisfaccion
-        ].filter(val => val !== "").map(Number);
+        ]
+            .filter(val => val !== "")
+            .map(Number);
 
         if (valores.length === 10) {
             const promedio = valores.reduce((acc, val) => acc + val, 0) / valores.length;
@@ -49,21 +48,21 @@ export default function Create() {
         ambiente_aprendizaje,
         estrategias_metodos,
         motivacion,
-        evaluacion,
+        evaluacionCampo,
         comunicacion,
         gestion_recurso,
         tecnologias,
         satisfaccion
     ]);
 
-    // Filtrar docentes según la carrera seleccionada
-    const docentesFiltrados = docentes.filter(
-        (doc) => doc.carrera_id == carrera_id
-    );
+    // Filtrar docentes según carrera
+    const docentesFiltrados = docentes.filter(doc => doc.carrera_id == carrera_id);
 
+    // Envio del formulario
     const handleSubmit = (e) => {
         e.preventDefault();
-        Inertia.post("/evaluaciones/evaluaciondocente", {
+
+        Inertia.put(`/evaluaciones/evaluaciondocente/${evaluacion.id}`, {
             docente_id,
             carrera_id,
             semestre,
@@ -72,7 +71,7 @@ export default function Create() {
             ambiente_aprendizaje,
             estrategias_metodos,
             motivacion,
-            evaluacion,
+            evaluacion: evaluacionCampo,
             comunicacion,
             gestion_recurso,
             tecnologias,
@@ -86,7 +85,7 @@ export default function Create() {
             {/* Encabezado */}
             <div className="bg-red-800 rounded-xl p-6 mb-8 shadow-md">
                 <h1 className="text-3xl font-bold text-white text-center">
-                    Registrar Evaluación Docente
+                    Editar Evaluación Docente
                 </h1>
             </div>
 
@@ -97,9 +96,7 @@ export default function Create() {
 
                         {/* Carrera */}
                         <div className="mb-4">
-                            <label className="block text-gray-700 font-semibold mb-2">
-                                Carrera:
-                            </label>
+                            <label className="block text-gray-700 font-semibold mb-2">Carrera:</label>
                             <select
                                 value={carrera_id}
                                 onChange={(e) => {
@@ -110,7 +107,7 @@ export default function Create() {
                                 required
                             >
                                 <option value="">Seleccione una carrera</option>
-                                {carreras.map((carrera) => (
+                                {carreras.map(carrera => (
                                     <option key={carrera.id} value={carrera.id}>
                                         {carrera.nombre}
                                     </option>
@@ -118,21 +115,18 @@ export default function Create() {
                             </select>
                         </div>
 
-                        {/* Docente filtrado */}
+                        {/* Docente */}
                         <div className="mb-4">
-                            <label className="block text-gray-700 font-semibold mb-2">
-                                Docente:
-                            </label>
+                            <label className="block text-gray-700 font-semibold mb-2">Docente:</label>
                             <select
                                 value={docente_id}
                                 onChange={(e) => setDocenteId(e.target.value)}
+                                disabled={!carrera_id}
                                 className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
                                 required
-                                disabled={!carrera_id}
                             >
                                 <option value="">Seleccione un docente</option>
-
-                                {docentesFiltrados.map((docente) => (
+                                {docentesFiltrados.map(docente => (
                                     <option key={docente.id} value={docente.id}>
                                         {docente.nombres} {docente.apellido_paterno} {docente.apellido_materno}
                                     </option>
@@ -142,36 +136,32 @@ export default function Create() {
 
                         {/* Semestre */}
                         <div>
-                            <label className="block mb-2 text-gray-700 font-medium">
-                                Semestre:
-                            </label>
+                            <label className="block mb-2 text-gray-700 font-medium">Semestre:</label>
                             <input
                                 type="text"
                                 value={semestre}
                                 onChange={(e) => setSemestre(e.target.value)}
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500"
                                 maxLength={18}
                                 required
                             />
                         </div>
 
-                        {/* CAMPOS NUMÉRICOS */}
+                        {/* Inputs numéricos */}
                         <InputNumber label="Dominio de asignatura" value={dominio_asignatura} setValue={setDominioAsignatura} />
                         <InputNumber label="Planificación del curso" value={planificacion_curso} setValue={setPlanificacionCurso} />
                         <InputNumber label="Ambiente de aprendizaje" value={ambiente_aprendizaje} setValue={setAmbienteAprendizaje} />
-                        <InputNumber label="Estrategias, métodos y técnicas" value={estrategias_metodos} setValue={setEstrategiasMetodos} />
+                        <InputNumber label="Estrategias y métodos" value={estrategias_metodos} setValue={setEstrategiasMetodos} />
                         <InputNumber label="Motivación" value={motivacion} setValue={setMotivacion} />
-                        <InputNumber label="Evaluación" value={evaluacion} setValue={setEvaluacion} />
+                        <InputNumber label="Evaluación" value={evaluacionCampo} setValue={setEvaluacionCampo} />
                         <InputNumber label="Comunicación" value={comunicacion} setValue={setComunicacion} />
                         <InputNumber label="Gestión del recurso" value={gestion_recurso} setValue={setGestionRecurso} />
                         <InputNumber label="Tecnologías" value={tecnologias} setValue={setTecnologias} />
                         <InputNumber label="Satisfacción" value={satisfaccion} setValue={setSatisfaccion} />
-                        
-                        {/* Resultado Global - Solo lectura */}
-                        <div className="mb-4 col-span-1 md:col-span-2">
-                            <label className="block text-gray-700 font-semibold mb-2">
-                                Resultado Global (Promedio):
-                            </label>
+
+                        {/* Resultado final */}
+                        <div className="mb-4 col-span-2">
+                            <label className="block text-gray-700 font-semibold mb-2">Resultado Global:</label>
                             <input
                                 type="text"
                                 value={resultado_global}
@@ -182,13 +172,14 @@ export default function Create() {
                         </div>
 
                         {/* Botones */}
-                        <div className="flex gap-4 col-span-1 md:col-span-2 mt-4">
+                        <div className="flex gap-4 col-span-2 mt-4">
                             <button
                                 type="submit"
-                                className="flex-1 bg-red-800 text-yellow-400 hover:bg-red-700 hover:text-yellow-300 px-6 py-3 rounded-lg font-semibold transition"
+                                className="flex-1 bg-red-800 text-yellow-400 hover:bg-red-700 px-6 py-3 rounded-lg font-semibold transition"
                             >
-                                Guardar Evaluación
+                                Actualizar Evaluación
                             </button>
+
                             <button
                                 type="button"
                                 onClick={() => window.history.back()}
@@ -197,6 +188,7 @@ export default function Create() {
                                 Cancelar
                             </button>
                         </div>
+
                     </div>
                 </form>
             </div>
@@ -207,18 +199,16 @@ export default function Create() {
 function InputNumber({ label, value, setValue }) {
     return (
         <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-2">
-                {label}:
-            </label>
+            <label className="block text-gray-700 font-semibold mb-2">{label}:</label>
             <input
                 type="number"
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
                 min="1"
-                max="5"
+                max="10"
                 step="0.01"
+                onChange={(e) => setValue(e.target.value)}
                 required
+                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
             />
         </div>
     );
