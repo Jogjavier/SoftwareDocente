@@ -11,7 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::dropIfExists('curso_interno_docente');
+        Schema::dropIfExists('curso_externo_docente');
+        Schema::dropIfExists('curso_interno');
+        Schema::dropIfExists('curso_externo');
+        Schema::dropIfExists('constancia');
     }
 
     /**
@@ -19,6 +23,34 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::create('curso_interno', function (Blueprint $table) {
+        $table->id();
+        // campos...
+        $table->timestamps();
+    });
+
+    Schema::create('curso_interno_docente', function (Blueprint $table) {
+        $table->id();
+        // campos...
+        $table->timestamps();
+    });
+
+    Schema::create('curso_externo', function (Blueprint $table) {
+        $table->id();
+        // campos...
+        $table->timestamps();
+    });
+
+    Schema::create('curso_externo_docente', function (Blueprint $table) {
+        $table->id();
+        // campos...
+        $table->timestamps();
+    });
+
+    Schema::create('constancia', function (Blueprint $table) {
+        $table->id();
+        // campos...
+        $table->timestamps();
+    });
     }
 };

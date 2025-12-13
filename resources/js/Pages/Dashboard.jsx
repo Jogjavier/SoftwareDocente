@@ -37,8 +37,7 @@ const modules = [
     color: "burgundy",
     icon: <FaChalkboardTeacher size={40} className="text-red-800" />,
     submenus: [
-      { name: "Registrar Curso Interno", route: "/capacitaciones/cursointerno/create" },
-      { name: "Registrar Curso Externo", route: "/capacitaciones/cursoexterno/create" },
+      { name: "Registrar Curso", route: "/capacitaciones/create" },
       { name: "Ver Capacitaciones y Constancias", route: "/capacitaciones/constancia/index" },
       { name: "Generar Constancia", route: "/capacitaciones/constancia/create" },
     ],

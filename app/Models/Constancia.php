@@ -6,30 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Constancia extends Model
 {
-    protected $table = 'constancia';
-
+    protected $table = 'capacitaciones';
     protected $fillable = [
-        'nombre_completo',
-        'curp',
-        'centro_adscripcion',
-        'periodo_inicio',
-        'periodo_fin',
-        'nombre_curso',
-        'modalidad',
-        'horas',
-        'folio',
-        'fecha_emision',
+        'tipo_curso',
+        'nombre',
+        'instructor',
         'autoridad_educativa',
-        'pdf_path',
+        'docente_id',
+        'duracion_horas',
+        'fecha_inicio',
+        'fecha_fin',
+        'tipo',
+        'modalidad',
+        'folio_fechaemision',
+        'modulo_horas',
+        'modulo_calificacion',
     ];
-
-    public function cursoInterno()
-    {
-        return $this->belongsTo(CursoInterno::class, 'curso_interno_id');
-    }
-    
-    public function cursoExterno()
-    {
-        return $this->belongsTo(CursoExterno::class, 'curso_externo_id');
-    }
 }
