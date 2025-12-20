@@ -1,11 +1,15 @@
 import React, { useState } from "react";
-import { FaBook, FaUserTie, FaClipboardCheck, FaChalkboardTeacher } from "react-icons/fa";
-import { Inertia } from "@inertiajs/inertia";
+import {
+  FaBook,
+  FaUserTie,
+  FaClipboardCheck,
+  FaChalkboardTeacher,
+} from "react-icons/fa";
+// import { Inertia } from "@inertiajs/inertia";
 
 const modules = [
   {
     name: "Catálogo",
-    color: "burgundy",
     icon: <FaBook size={40} className="text-red-800" />,
     submenus: [
       { name: "Dar de alta", route: "/catalogo/carreras/create" },
@@ -14,134 +18,120 @@ const modules = [
   },
   {
     name: "Docente",
-    color: "burgundy",
     icon: <FaUserTie size={40} className="text-red-800" />,
     submenus: [
       { name: "Registrar", route: "/docentes/create" },
       { name: "Ver docentes", route: "/docentes/index" },
-      { name: "Activar Docente", route: "/docentes/activar" },
+      { name: "Activar Docente", route: "/docentes/activardocente/index" },
     ],
   },
   {
     name: "Evaluaciones",
-    color: "burgundy",
     icon: <FaClipboardCheck size={40} className="text-red-800" />,
     submenus: [
-      { name: "Evaluación docente", route: "/evaluaciones/evaluaciondocente" },
-      { name: "Registrar evaluación docente", route: "/evaluaciones/evaluaciondocente/create" },
-      { name: "Evaluación departamental", route: "/evaluaciones/departamental" },
+      {
+        name: "Evaluación docente",
+        route: "/evaluaciones/evaluaciondocente",
+      },
+      {
+        name: "Registrar evaluación docente",
+        route: "/evaluaciones/evaluaciondocente/create",
+      },
+      {
+        name: "Evaluación departamental",
+        route: "/evaluaciones/departamental",
+      },
     ],
   },
   {
     name: "Capacitaciones",
-    color: "burgundy",
     icon: <FaChalkboardTeacher size={40} className="text-red-800" />,
     submenus: [
       { name: "Registrar Curso", route: "/capacitaciones/create" },
-      { name: "Ver Capacitaciones y Constancias", route: "/capacitaciones/constancia/index" },
-      { name: "Generar Constancia", route: "/capacitaciones/constancia/create" },
+      {
+        name: "Ver Capacitaciones y Constancias",
+        route: "/capacitaciones/constancia/index",
+      },
+      {
+        name: "Generar Constancia",
+        route: "/capacitaciones/constancia/create",
+      },
     ],
   },
 ];
 
 export default function Dashboard() {
-  const [hoveredModule, setHoveredModule] = useState(null);
-  const [timeoutId, setTimeoutId] = useState(null);
+  const [openModule, setOpenModule] = useState(null);
 
-  const handleMouseEnter = (moduleName) => {
-    // Limpiar cualquier timeout pendiente
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    setHoveredModule(moduleName);
+  const toggleModule = (moduleName) => {
+    setOpenModule(openModule === moduleName ? null : moduleName);
   };
 
-  const handleMouseLeave = () => {
-    // Establecer un delay de 0.1 segundos antes de ocultar el menú
-    const id = setTimeout(() => {
-      setHoveredModule(null);
-    }, 100); // 0.1 segundo de delay
-    setTimeoutId(id);
-  };
-
-  const handleSubmenuMouseEnter = () => {
-    // Cancelar el timeout si el usuario vuelve a poner el mouse sobre el menú
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-  };
-
-  const goTo = (route) => {
-    // Con Inertia (descomenta si lo usas):
-    Inertia.visit(route);
+  const handleNavigate = (route) => {
     console.log("Navegando a:", route);
-  };
 
-  const getCardStyle = (color) => {
-    return "bg-white hover:shadow-lg";
-  };
+    // 👉 Para Inertia (Laravel)
+    // Inertia.visit(route);
 
-  const getTitleColor = (color) => {
-    return "text-red-800";
-  };
-
-  const getSubmenuStyle = (color) => {
-    return "bg-red-800 border-red-700";
+    // 👉 Temporal (prueba)
+    window.location.href = route;
   };
 
   return (
     <div className="min-h-screen bg-white p-6">
-      <div className="bg-red-800 rounded-3xl p-8 mb-8">
+      {/* Encabezado */}
+      <div className="bg-red-800 rounded-3xl p-8 mb-10 shadow-lg">
         <h1 className="text-4xl font-bold text-white text-center">
           Sistema de Profesionalización Docente
         </h1>
       </div>
 
+      {/* Módulos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {modules.map((mod) => (
-          <div
-            key={mod.name}
-            className={`${getCardStyle(mod.color)} rounded-2xl shadow-md p-6 cursor-pointer transition-all duration-300 hover:scale-105 relative`}
-            onMouseEnter={() => handleMouseEnter(mod.name)}
-            onMouseLeave={handleMouseLeave}
-          >
-            {/* Contenido principal de la carta */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-4">
-                {mod.icon}
+          <div key={mod.name} className="relative">
+            {/* Card */}
+            <button
+              type="button"
+              onClick={() => toggleModule(mod.name)}
+              className="w-full bg-white rounded-2xl shadow-md p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 focus:outline-none"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-4">{mod.icon}</div>
+                <h2 className="text-xl font-bold text-red-800">
+                  {mod.name}
+                </h2>
               </div>
-              <h2 className={`text-xl font-bold ${getTitleColor(mod.color)}`}>
-                {mod.name}
-              </h2>
-              <p className="text-gray-500 mt-2 text-sm">{mod.description}</p>
-            </div>
+            </button>
 
-            {/* Submenu que aparece al hacer hover */}
-            {hoveredModule === mod.name && (
-              <div 
-                className={`absolute top-full left-0 right-0 ${getSubmenuStyle(mod.color)} rounded-lg shadow-lg border mt-2 z-10 animate-in fade-in duration-200`}
-                onMouseEnter={handleSubmenuMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
+            {/* Submenú */}
+            {openModule === mod.name && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-red-800 rounded-xl shadow-xl z-20">
                 <div className="p-2">
-                  {mod.submenus.map((sub, index) => (
-                    <div
+                  {mod.submenus.map((sub) => (
+                    <button
                       key={sub.name}
-                      className="py-2 px-3 rounded hover:bg-red-700 cursor-pointer text-yellow-500 transition-colors duration-150 text-sm font-medium hover:text-yellow-400"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        goTo(sub.route);
-                      }}
+                      type="button"
+                      onClick={() => handleNavigate(sub.route)}
+                      className="w-full text-left py-2 px-4 rounded-lg text-white text-sm font-medium hover:bg-red-700 transition-colors"
                     >
                       {sub.name}
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
             )}
-
           </div>
         ))}
+      </div>
+
+      {/* Logo */}
+      <div className="mt-14 flex justify-center">
+        <img
+          src="/storage/ITSZO.webp"
+          alt="Logo ITSZO"
+          className="h-72 opacity-90 hover:opacity-100 transition-opacity"
+        />
       </div>
     </div>
   );

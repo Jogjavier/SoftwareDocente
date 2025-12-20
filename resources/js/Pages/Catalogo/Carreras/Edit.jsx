@@ -103,7 +103,7 @@ export default function Edit({ carrera = { id: 1, nombre: "Ingeniería en Sistem
                 type="submit"
                 onClick={handleSubmit}
                 disabled={loading || !nombre.trim()}
-                className="flex-1 bg-red-800 hover:bg-red-700 disabled:bg-gray-400 text-yellow-400 hover:text-yellow-300 disabled:text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg"
+                className="flex-1 bg-red-800 hover:bg-red-700 disabled:bg-gray-400 text-white hover:text-yellow-300 disabled:text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg"
               >
                 {loading ? (
                   <>

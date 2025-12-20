@@ -45,7 +45,7 @@ export default function Index({ carreras = [], filters = {} }) {
         />
         <button
           type="submit"
-          className="bg-red-800 text-yellow-400 px-4 py-2 rounded hover:bg-red-700"
+          className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-700"
         >
           Buscar
         </button>
@@ -73,13 +73,13 @@ export default function Index({ carreras = [], filters = {} }) {
                     <div className="flex gap-2 justify-center">
                       <button
                         onClick={() => handleEdit(carrera.id)}
-                        className="px-4 py-2 bg-red-800 text-yellow-400 hover:bg-red-700 rounded"
+                        className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-700"
                       >
                         Editar
                       </button>
                       <button
                         onClick={() => handleDelete(carrera.id)}
-                        className="px-4 py-2 bg-red-800 text-yellow-400 hover:bg-red-900 rounded"
+                        className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-700"
                       >
                         Eliminar
                       </button>

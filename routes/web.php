@@ -10,6 +10,7 @@ use App\Http\Controllers\NivelEstudioController;
 use App\Http\Controllers\ExperienciaDocenteController;
 use App\Http\Controllers\ConstanciaController;
 use App\Http\Controllers\EvaluacionDocenteController;
+use App\Http\Controllers\ActivarDocenteController;
 
 Route::get('/', function () {
     return Inertia::render('Dashboard');
@@ -71,7 +72,7 @@ Route::prefix('evaluaciones/evaluaciondocente')->name('evaluaciones.evaluaciondo
     Route::get('/data/carrera/{carreraId}', [EvaluacionDocenteController::class, 'dataPorCarrera'])->name('data.carrera');
     Route::get('/data/general', [EvaluacionDocenteController::class, 'dataGeneral'])->name('data.general');
 });
-
+// Capacitaciones
 Route::prefix('capacitaciones')->name('capacitaciones.')->group(function () {
     Route::get('/index', [ConstanciaController::class, 'index'])->name('index');
     Route::get('/create', [ConstanciaController::class, 'create'])->name('create');
@@ -79,4 +80,13 @@ Route::prefix('capacitaciones')->name('capacitaciones.')->group(function () {
     Route::get('/{constancia}/edit', [ConstanciaController::class, 'edit'])->name('edit');
     Route::put('/{constancia}', [ConstanciaController::class, 'update'])->name('update');
     Route::delete('/{constancia}', [ConstanciaController::class, 'destroy'])->name('destroy');
+});
+// Activar Docente
+Route::prefix('docentes/activardocente')->name('docentes.activardocente.')->group(function () {
+    Route::get('/index', [ActivarDocenteController::class, 'index'])->name('index');
+    Route::get('/create', [ActivarDocenteController::class, 'create'])->name('create');
+    Route::post('/', [ActivarDocenteController::class, 'store'])->name('store');
+    Route::get('/{activardocente}/edit', [ActivarDocenteController::class, 'edit'])->name('edit');
+    Route::put('/{activardocente}', [ActivarDocenteController::class, 'update'])->name('update');
+    Route::delete('/{activardocente}', [ActivarDocenteController::class, 'destroy'])->name('destroy');
 });
