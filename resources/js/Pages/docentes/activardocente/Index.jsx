@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, router, usePage } from "@inertiajs/react";
 
-export default function Index({ registros, filters, carreras }) {
+export default function Index({ registros, filters, carreras, anios }) {
 
   const applyFilter = (key, value) => {
     router.get(
@@ -25,19 +25,31 @@ export default function Index({ registros, filters, carreras }) {
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8">
 
-        {/* Encabezado */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-red-800">
-            Activación de Docentes
-          </h1>
+      {/* Encabezado */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-red-800">
+          Activación de Docentes
+        </h1>
 
-          <Link
-            href={route("docentes.activardocente.create")}
-            className="bg-red-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition"
-          >
-            + Crear
-          </Link>
+        {/* Botones */}
+        <div className="flex items-center space-x-3">
+            <button
+              onClick={() => router.visit("/")}
+              className="bg-red-800 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition"
+            >
+              Inicio
+            </button>
+
+            <Link
+              href={route("docentes.activardocente.create")}
+              className="bg-red-800 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition"
+            >
+              + Crear
+            </Link>
+          </div>
         </div>
+
+
 
         {/* Filtros */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -62,6 +74,20 @@ export default function Index({ registros, filters, carreras }) {
             <option value="">Todos los semestres</option>
             <option value="ENE-JUN">ENE - JUN</option>
             <option value="AGO-DIC">AGO - DIC</option>
+          </select>
+
+          {/* Año */}
+          <select
+            className="border rounded-lg px-4 py-2"
+            value={filters.anio ?? ""}
+            onChange={(e) => applyFilter("anio", e.target.value)}
+          >
+            <option value="">Todos los años</option>
+            {anios.map((anio) => (
+              <option key={anio} value={anio}>
+                {anio}
+              </option>
+            ))}
           </select>
 
           {/* Carrera */}

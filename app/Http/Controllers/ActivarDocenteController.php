@@ -15,7 +15,7 @@ class ActivarDocenteController extends Controller
     {
         $query = ActivarDocente::with(['docente', 'carrera']);
 
-        // Filtro estado activo / inactivo
+        // Filtro estado
         if ($request->filled('activo')) {
             $query->where('activo', $request->activo);
         }
@@ -25,10 +25,21 @@ class ActivarDocenteController extends Controller
             $query->where('semestre', $request->semestre);
         }
 
+        // Filtro año
+        if ($request->filled('anio')) {
+            $query->where('anio', $request->anio);
+        }
+
         // Filtro carrera
         if ($request->filled('carrera_id')) {
             $query->where('carrera_id', $request->carrera_id);
         }
+
+        // Años disponibles
+        $anios = ActivarDocente::select('anio')
+            ->distinct()
+            ->orderBy('anio', 'desc')
+            ->pluck('anio');
 
         return Inertia::render('docentes/activardocente/Index', [
             'registros' => $query
@@ -36,11 +47,18 @@ class ActivarDocenteController extends Controller
                 ->orderBy('semestre', 'desc')
                 ->get(),
 
-            // Para los selects
-            'filters' => $request->only(['activo', 'semestre', 'carrera_id']),
+            'filters' => $request->only([
+                'activo',
+                'semestre',
+                'anio',
+                'carrera_id'
+            ]),
+
             'carreras' => Carrera::select('id', 'nombre')->get(),
+            'anios' => $anios,
         ]);
     }
+
 
     public function create (Request $request)
     {

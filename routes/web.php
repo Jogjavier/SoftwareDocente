@@ -32,6 +32,8 @@ Route::prefix('catalogo/carreras')->name('carreras.')->group(function () {
 
 // Docentes
 Route::prefix('docentes')->name('docentes.')->group(function () {
+    Route::get('/reporte-pdf', [DocenteController::class, 'generarReportePDF'])
+    ->name('docentes.reporte.pdf');
     Route::get('/create', [DocenteController::class, 'create'])->name('create');
     Route::post('/', [DocenteController::class, 'store'])->name('store');
     Route::get('/index', [DocenteController::class, 'index'])->name('index');

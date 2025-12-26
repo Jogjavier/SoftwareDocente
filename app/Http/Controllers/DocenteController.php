@@ -6,6 +6,8 @@ use App\Models\Docente;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Carrera;
+use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 class DocenteController extends Controller
 {
@@ -13,17 +15,18 @@ class DocenteController extends Controller
     {
         $search = $request->input('search');
 
-         $docentes = Docente::query()
+        $docentes = Docente::query()
         ->when($search, function ($query, $search) {
-            $query->where('nombres', 'ILIKE', "%{$search}%");
+            $query->where('nombres', 'ILIKE', "%{$search}%")
+                  ->orWhere('apellido_paterno', 'ILIKE', "%{$search}%")
+                  ->orWhere('apellido_materno', 'ILIKE', "%{$search}%");
         })
         ->orderBy('id', 'asc')
         ->get();
 
         return Inertia::render('docentes/Index', [
             'docentes' => $docentes,
-            'filters' => [
-                'search' => $search,
+            'filters' => ['search' => $search,
             ],
         ]);
     }
@@ -169,5 +172,37 @@ class DocenteController extends Controller
         $docente->delete();
 
         return redirect()->route('docentes.index')->with('success', 'Docente eliminado exitosamente');
+    }
+
+    public function generarReportePDF()
+    {
+        $reporteNivelPorCarrera = DB::table('nivel_estudios')
+            ->join('docentes', 'nivel_estudios.docente_id', '=', 'docentes.id')
+            ->join('carreras', 'docentes.carrera_id', '=', 'carreras.id')
+            ->select(
+                'carreras.nombre as carrera',
+                'nivel_estudios.nivel',
+                'docentes.nombres',
+                'docentes.apellido_paterno',
+                'docentes.apellido_materno',
+                'docentes.sexo'
+            )
+            ->orderBy('carreras.nombre')
+            ->orderBy('nivel_estudios.nivel')
+            ->orderBy('docentes.apellido_paterno')
+            ->get();
+
+        // Agrupar primero por carrera, luego por nivel
+        $reporteAgrupado = $reporteNivelPorCarrera->groupBy('carrera')->map(function ($carrera) {
+            return $carrera->groupBy('nivel');
+        });
+
+        // Generar PDF
+        $pdf = PDF::loadView('reportes.nivel-estudios-carrera', [
+            'reporteAgrupado' => $reporteAgrupado,
+            'fecha' => now()->format('d/m/Y H:i')
+        ]);
+
+        return $pdf->download('reporte-nivel-estudios-carrera.pdf');
     }
 }

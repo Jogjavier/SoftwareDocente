@@ -15,6 +15,12 @@ export default function Create({ docentes, carreras }) {
     post(route("docentes.activardocente.store"));
   };
 
+  const docentesFiltrados = data.carrera_id
+  ? docentes.filter(
+      (docente) => docente.carrera_id == data.carrera_id
+    )
+  : [];
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-8">
@@ -48,28 +54,35 @@ export default function Create({ docentes, carreras }) {
           </div>
 
           {/* Docente */}
-          <div>
-            <label className="block font-semibold text-gray-700 mb-1">
-              Docente
-            </label>
-            <select
-              className="w-full border rounded-lg px-4 py-2 focus:ring focus:ring-red-200"
-              value={data.docente_id}
-              onChange={(e) => setData("docente_id", e.target.value)}
-            >
-              <option value="">Seleccione un docente</option>
-              {docentes.map((docente) => (
-                <option key={docente.id} value={docente.id}>
-                  {docente.nombres} {docente.apellido_paterno} {docente.apellido_materno}
-                </option>
-              ))}
-            </select>
-            {errors.docente_id && (
-              <p className="text-red-600 text-sm mt-1">
-                {errors.docente_id}
-              </p>
-            )}
-          </div>
+<div>
+  <label className="block font-semibold text-gray-700 mb-1">
+    Docente
+  </label>
+  <select
+    className="w-full border rounded-lg px-4 py-2 focus:ring focus:ring-red-200"
+    value={data.docente_id}
+    onChange={(e) => setData("docente_id", e.target.value)}
+    disabled={!data.carrera_id}
+  >
+    <option value="">
+      {data.carrera_id
+        ? "Seleccione un docente"
+        : "Seleccione primero una carrera"}
+    </option>
+
+    {docentesFiltrados.map((docente) => (
+      <option key={docente.id} value={docente.id}>
+        {docente.nombres} {docente.apellido_paterno} {docente.apellido_materno}
+      </option>
+    ))}
+  </select>
+
+  {errors.docente_id && (
+    <p className="text-red-600 text-sm mt-1">
+      {errors.docente_id}
+    </p>
+  )}
+</div>
 
           {/* Semestre */}
           <div>
