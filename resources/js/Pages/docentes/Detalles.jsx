@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Inertia } from "@inertiajs/inertia";
-import { Link } from "@inertiajs/inertia-react";
+import { router, Link } from "@inertiajs/react";
 
 export default function Detalles({ docente, experiencias = [] }) {
   const [showExperiencias, setShowExperiencias] = useState(false);
@@ -11,7 +10,7 @@ export default function Detalles({ docente, experiencias = [] }) {
       <div className="bg-red-800 rounded-xl p-6 mb-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Detalles del Docente</h1>
         <button
-          onClick={() => Inertia.visit("/docentes")}
+          onClick={() => router.visit("/docentes/index")}
           className="bg-yellow-400 text-red-800 px-4 py-2 rounded font-semibold hover:bg-yellow-300"
         >
           Regresar
@@ -94,26 +93,26 @@ export default function Detalles({ docente, experiencias = [] }) {
                     {nivel.titulo_path && (
                       <>
                         <p className="text-gray-600 font-semibold">Título:</p>
-                        <a
+                          <a
                           href={`/storage/${nivel.titulo_path}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:underline"
-                        >
+                          >
                           Ver título
                         </a>
                       </>
                     )}
 
                     {nivel.cedula_path && (
-                      <>
+                        <>
                         <p className="text-gray-600 font-semibold">Cédula:</p>
-                        <a
+                          <a
                           href={`/storage/${nivel.cedula_path}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:underline"
-                        >
+                          >
                           Ver cédula
                         </a>
                       </>

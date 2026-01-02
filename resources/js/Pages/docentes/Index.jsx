@@ -6,18 +6,18 @@ export default function Index({ docentes = [], filters = {} }) {
 
   const handleDelete = (id) => {
     if (confirm("¿Seguro que deseas eliminar este docente?")) {
-      Inertia.delete(`/docentes/${id}`);
+      router.delete(`/docentes/${id}`);  // Cambiar Inertia por router
     }
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    Inertia.get("/docentes/index", { search });
+    router.get("/docentes/index", { search });  // Cambiar Inertia por router
   };
 
   const generarReportePDF = () => {
     window.open('/docentes/reporte-pdf', '_blank');
-};
+  };
 
   return (
     <div className="min-h-screen bg-white p-6">
@@ -102,15 +102,14 @@ export default function Index({ docentes = [], filters = {} }) {
                   </td>
                   <td className="p-3 border-gray-200">
                     <div className="flex gap-2 justify-center">
-                      {/* ✅ SOLO UN BOTÓN DE DETALLES */}
                       <button
-                        onClick={() => Inertia.visit(`/docentes/${docente.id}`)}
+                        onClick={() => router.visit(`/docentes/${docente.id}`)}
                         className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-500 rounded"
                       >
                         Ver Detalles
                       </button>
                       <button
-                        onClick={() => Inertia.visit(`/docentes/${docente.id}/edit`)}
+                        onClick={() => router.visit(`/docentes/${docente.id}/edit`)}
                         className="px-4 py-2 bg-yellow-500 text-white hover:bg-yellow-400 rounded"
                       >
                         Editar

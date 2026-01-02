@@ -29,7 +29,7 @@ export default function PorDocente() {
       axios.get(`/evaluaciones/evaluaciondocente/data/docente/${docenteId}`)
         .then(res => {
           setEvaluaciones(res.data.evaluaciones || []);
-          setPromedios(res.data.promediosSemestre || []);
+          setPromedios(res.data.promediosPeriodo || []);
         })
         .catch(err => {
           console.error(err);
@@ -53,15 +53,15 @@ export default function PorDocente() {
     ? `${docenteSeleccionado.nombres} ${docenteSeleccionado.apellido_paterno} ${docenteSeleccionado.apellido_materno}`
     : "";
 
-  // FUNCIÓN PARA COLOR Y EVALUACIÓN
-  const getColorClass = (promedio) => {
-    const p = parseFloat(promedio);
-
-    if (p < 3.25) return "text-red-600 bg-red-50";
-    if (p < 3.75) return "text-orange-600 bg-orange-50";
-    if (p < 4.25) return "text-yellow-600 bg-yellow-50";
-    if (p < 4.75) return "text-blue-600 bg-blue-50";
-    return "text-green-600 bg-green-50";
+  // FUNCIÓN PARA COLOR SEGÚN CALIFICACIÓN (INDIVIDUAL POR CELDA)
+  const getColorClass = (valor) => {
+    const v = parseFloat(valor);
+    
+    if (v < 3.25) return "bg-red-100 text-red-800 font-semibold"; // Insatisfactorio
+    if (v < 3.75) return "bg-orange-100 text-orange-800 font-semibold"; // Suficiente
+    if (v < 4.25) return "bg-yellow-100 text-yellow-800 font-semibold"; // Bueno
+    if (v < 4.75) return "bg-blue-100 text-blue-800 font-semibold"; // Notable
+    return "bg-green-100 text-green-800 font-semibold"; // Sobresaliente
   };
 
   return (
@@ -127,6 +127,61 @@ export default function PorDocente() {
             </div>
           )}
         </div>
+        
+        {/* GRÁFICA DE BARRAS */}
+        {!loading && promedios.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Evolución del Resultado Global por Periodo
+            </h2>
+
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={promedios}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="periodo_completo" />
+                <YAxis domain={[0, 5]} />
+                <Tooltip />
+                <Legend />
+
+                <Bar
+                  dataKey="promedio"
+                  name="Promedio"
+                  fill="#991b1b"
+                  barSize={50}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* Leyenda de colores */}
+        {!loading && docenteId && evaluaciones.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h3 className="font-bold text-gray-800 mb-3">Escala de Evaluación:</h3>
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-red-100 border border-red-300 rounded"></div>
+                <span className="text-sm">0.0 - 3.25 (Insatisfactorio)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-orange-100 border border-orange-300 rounded"></div>
+                <span className="text-sm">3.25 - 3.75 (Suficiente)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-yellow-100 border border-yellow-300 rounded"></div>
+                <span className="text-sm">3.75 - 4.25 (Bueno)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-blue-100 border border-blue-300 rounded"></div>
+                <span className="text-sm">4.25 - 4.75 (Notable)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-green-100 border border-green-300 rounded"></div>
+                <span className="text-sm">4.75 - 5.0 (Sobresaliente)</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
@@ -149,46 +204,77 @@ export default function PorDocente() {
             </h2>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm border-collapse">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="p-3">Semestre</th>
-                    <th className="p-3">Resultado Global</th>
-                    <th className="p-3">Dominio</th>
-                    <th className="p-3">Planificación</th>
-                    <th className="p-3">Ambiente</th>
-                    <th className="p-3">Comunicación</th>
+                    <th className="p-3 border border-gray-300">Periodo</th>
+                    <th className="p-3 border border-gray-300">Resultado Global</th>
+                    <th className="p-3 border border-gray-300">Dominio de la Asignatura</th>
+                    <th className="p-3 border border-gray-300">Planificación del Curso</th>
+                    <th className="p-3 border border-gray-300">Ambientes de Aprendisaje</th>
+                    <th className="p-3 border border-gray-300">Estrategias, métodos y técnicas</th>
+                    <th className="p-3 border border-gray-300">Motivación</th>
+                    <th className="p-3 border border-gray-300">Evaluación</th>
+                    <th className="p-3 border border-gray-300">Comunicación</th>
+                    <th className="p-3 border border-gray-300">Gestión del curso</th>
+                    <th className="p-3 border border-gray-300">Tecnologías de la información y comunicación</th>
+                    <th className="p-3 border border-gray-300">Satisfacción General</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {evaluaciones.map(ev => {
-                    const color = getColorClass(ev.resultado_global);
-
+                    // Crear el semestre completo
+                    const semestreCompleto = `${ev.periodo} ${ev.anio}`;
+                    
                     return (
                       <tr key={ev.id}>
-                        <td className="p-3">{ev.semestre}</td>
-
-                        <td
-                          className={`p-3 font-bold rounded-lg ${color}`}
-                        >
-                          {ev.resultado_global}
+                        <td className="p-3 border border-gray-300 font-medium">
+                          {semestreCompleto}
                         </td>
 
-                        <td className={color + " p-3 rounded-lg"}>
-                          {ev.dominio_asignatura}
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(ev.resultado_global)}`}>
+                          {parseFloat(ev.resultado_global).toFixed(2)}
                         </td>
 
-                        <td className={color + " p-3 rounded-lg"}>
-                          {ev.planificacion_curso}
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(ev.dominio_asignatura)}`}>
+                          {parseFloat(ev.dominio_asignatura).toFixed(2)}
                         </td>
 
-                        <td className={color + " p-3 rounded-lg"}>
-                          {ev.ambiente_aprendizaje}
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(ev.planificacion_curso)}`}>
+                          {parseFloat(ev.planificacion_curso).toFixed(2)}
                         </td>
 
-                        <td className={color + " p-3 rounded-lg"}>
-                          {ev.comunicacion}
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(ev.ambiente_aprendizaje)}`}>
+                          {parseFloat(ev.ambiente_aprendizaje).toFixed(2)}
+                        </td>
+
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(ev.estrategias_metodos)}`}>
+                          {parseFloat(ev.estrategias_metodos).toFixed(2)}
+                        </td>
+
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(ev.motivacion)}`}>
+                          {parseFloat(ev.motivacion).toFixed(2)}
+                        </td>
+
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(ev.evaluacion)}`}>
+                          {parseFloat(ev.evaluacion).toFixed(2)}
+                        </td>
+
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(ev.comunicacion)}`}>
+                          {parseFloat(ev.comunicacion).toFixed(2)}
+                        </td>
+
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(ev.gestion_recurso)}`}>
+                          {parseFloat(ev.gestion_recurso).toFixed(2)}
+                        </td>
+
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(ev.tecnologias)}`}>
+                          {parseFloat(ev.tecnologias).toFixed(2)}
+                        </td>
+
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(ev.satisfaccion)}`}>
+                          {parseFloat(ev.satisfaccion).toFixed(2)}
                         </td>
                       </tr>
                     );
@@ -196,7 +282,7 @@ export default function PorDocente() {
 
                   {evaluaciones.length === 0 && (
                     <tr>
-                      <td colSpan="6" className="text-center p-8 text-gray-500">
+                      <td colSpan="12" className="text-center p-8 text-gray-500">
                         No hay evaluaciones registradas
                       </td>
                     </tr>
@@ -204,32 +290,6 @@ export default function PorDocente() {
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
-
-        {/* GRÁFICA DE BARRAS */}
-        {!loading && promedios.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
-              Evolución del Resultado Global por Semestre
-            </h2>
-
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={promedios}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="semestre" />
-                <YAxis domain={[0, 5]} />
-                <Tooltip />
-                <Legend />
-
-                <Bar
-                  dataKey="promedio"
-                  name="Promedio"
-                  fill="#991b1b"
-                  barSize={50}
-                />
-              </BarChart>
-            </ResponsiveContainer>
           </div>
         )}
       </div>

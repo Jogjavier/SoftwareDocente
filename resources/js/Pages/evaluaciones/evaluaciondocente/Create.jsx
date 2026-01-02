@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { usePage } from "@inertiajs/react";
-import { Inertia } from "@inertiajs/inertia";
+import { router } from '@inertiajs/react';
 
 export default function Create() {
     const { docentes, carreras } = usePage().props;
@@ -9,7 +9,8 @@ export default function Create() {
     const [docente_id, setDocenteId] = useState("");
 
     // Campos de evaluación
-    const [semestre, setSemestre] = useState("");
+    const [periodo, setPeriodo] = useState("");
+    const [anio, setAnio] = useState("");
     const [dominio_asignatura, setDominioAsignatura] = useState("");
     const [planificacion_curso, setPlanificacionCurso] = useState("");
     const [ambiente_aprendizaje, setAmbienteAprendizaje] = useState("");
@@ -63,10 +64,11 @@ export default function Create() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        Inertia.post("/evaluaciones/evaluaciondocente", {
+        router.post("/evaluaciones/evaluaciondocente", {
             docente_id,
             carrera_id,
-            semestre,
+            periodo,
+            anio,
             dominio_asignatura,
             planificacion_curso,
             ambiente_aprendizaje,
@@ -140,17 +142,36 @@ export default function Create() {
                             </select>
                         </div>
 
-                        {/* Semestre */}
+                         {/* Periodo */}
                         <div>
-                            <label className="block mb-2 text-gray-700 font-medium">
+                            <label className="block font-semibold text-gray-700 mb-2">
                                 Semestre:
                             </label>
+                            <select
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
+                                value={periodo}
+                                onChange={(e) => setPeriodo(e.target.value)}
+                                required
+                            >
+                                <option value="">Seleccione el periodo</option>
+                                <option value="ENE-JUN">ENE - JUN</option>
+                                <option value="AGO-DIC">AGO - DIC</option>
+                            </select>
+                        </div>
+
+                        {/* Año */}
+                        <div>
+                            <label className="block font-semibold text-gray-700 mb-2">
+                                Año:
+                            </label>
                             <input
-                                type="text"
-                                value={semestre}
-                                onChange={(e) => setSemestre(e.target.value)}
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                                maxLength={18}
+                                type="number"
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
+                                value={anio}
+                                onChange={(e) => setAnio(e.target.value)}
+                                min="2000"
+                                max="2100"
+                                placeholder="2024"
                                 required
                             />
                         </div>
@@ -191,7 +212,7 @@ export default function Create() {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => window.history.back()}
+                                onClick={() => router.visit('/evaluaciones/evaluaciondocente')}
                                 className="flex-1 bg-gray-300 text-gray-800 hover:bg-gray-400 px-6 py-3 rounded-lg font-semibold transition"
                             >
                                 Cancelar
@@ -216,7 +237,7 @@ function InputNumber({ label, value, setValue }) {
                 onChange={(e) => setValue(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
                 min="1"
-                max="5"
+                max="10"
                 step="0.01"
                 required
             />

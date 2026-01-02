@@ -42,21 +42,32 @@ class EvaluacionDocenteController extends Controller
 
     public function dataPorDocente($id)
     {
-        // Todas las evaluaciones del docente ordenadas por semestre
+        // Todas las evaluaciones del docente ordenadas por año y periodo
         $evaluaciones = EvaluacionDocente::where('docente_id', $id)
-            ->orderBy('semestre', 'asc')
+            ->orderBy('anio', 'asc')
+            ->orderBy('periodo', 'asc')
             ->get();
 
-        // Promedios por semestre (resultado_global) para línea
-        $promediosSemestre = EvaluacionDocente::select('semestre', DB::raw('AVG(resultado_global) as promedio'))
+        // Promedios por periodo y año (resultado_global) para línea
+        $promediosPeriodo = EvaluacionDocente::select(
+                'periodo', 
+                'anio',
+                DB::raw('AVG(resultado_global) as promedio')
+            )
             ->where('docente_id', $id)
-            ->groupBy('semestre')
-            ->orderBy('semestre')
-            ->get();
+            ->groupBy('periodo', 'anio')
+            ->orderBy('anio', 'asc')
+            ->orderBy('periodo', 'asc')
+            ->get()
+            ->map(function($item) {
+                // Crear un campo combinado para mostrar en gráficas
+                $item->periodo_completo = $item->periodo . ' ' . $item->anio;
+                return $item;
+            });
 
         return response()->json([
             'evaluaciones' => $evaluaciones,
-            'promediosSemestre' => $promediosSemestre,
+            'promediosPeriodo' => $promediosPeriodo,
         ]);
     }
 
@@ -65,8 +76,14 @@ class EvaluacionDocenteController extends Controller
     {
         $evaluaciones = EvaluacionDocente::where('carrera_id', $carreraId)
             ->with(['docente:id,nombres,apellido_paterno,apellido_materno'])
-            ->orderBy('semestre','asc')
-            ->get();
+            ->orderBy('anio', 'asc')
+            ->orderBy('periodo', 'asc')
+            ->get()
+            ->map(function($item) {
+                // Agregar campo combinado para facilitar la visualización
+                $item->semestre_completo = $item->periodo . ' ' . $item->anio;
+                return $item;
+            });
 
         // Promedio por docente (resultado_global)
         $promedioPorDocente = EvaluacionDocente::select('docente_id', DB::raw('AVG(resultado_global) as promedio'))
@@ -81,12 +98,21 @@ class EvaluacionDocenteController extends Controller
             return $item;
         });
 
-        // Promedios por semestre (general de la carrera)
-        $promediosSemestre = EvaluacionDocente::select('semestre', DB::raw('AVG(resultado_global) as promedio'))
+        // Promedios por periodo y año (general de la carrera)
+        $promediosSemestre = EvaluacionDocente::select(
+                'periodo', 
+                'anio',
+                DB::raw('AVG(resultado_global) as promedio')
+            )
             ->where('carrera_id', $carreraId)
-            ->groupBy('semestre')
-            ->orderBy('semestre')
-            ->get();
+            ->groupBy('periodo', 'anio')
+            ->orderBy('anio', 'asc')
+            ->orderBy('periodo', 'asc')
+            ->get()
+            ->map(function($item) {
+                $item->semestre_completo = $item->periodo . ' ' . $item->anio;
+                return $item;
+            });
 
         return response()->json([
             'evaluaciones' => $evaluaciones,
@@ -95,7 +121,7 @@ class EvaluacionDocenteController extends Controller
         ]);
     }
 
-    // Histórico general: promedio por carrera y por semestre
+    // Histórico general: promedio por carrera y por periodo
     public function dataGeneral()
     {
         // Promedio global por carrera
@@ -107,15 +133,24 @@ class EvaluacionDocenteController extends Controller
                 return [
                     'carrera_id' => $item->carrera_id,
                     'carrera' => $c?->nombre,
-                    'promedio' => round($item->promedio,2),
+                    'promedio' => round($item->promedio, 2),
                 ];
             });
 
-        // Promedios generales por semestre (todas las carreras)
-        $promediosSemestre = EvaluacionDocente::select('semestre', DB::raw('AVG(resultado_global) as promedio'))
-            ->groupBy('semestre')
-            ->orderBy('semestre')
-            ->get();
+        // Promedios generales por periodo y año (todas las carreras)
+        $promediosSemestre = EvaluacionDocente::select(
+                'periodo', 
+                'anio',
+                DB::raw('AVG(resultado_global) as promedio')
+            )
+            ->groupBy('periodo', 'anio')
+            ->orderBy('anio', 'asc')
+            ->orderBy('periodo', 'asc')
+            ->get()
+            ->map(function($item) {
+                $item->semestre_completo = $item->periodo . ' ' . $item->anio;
+                return $item;
+            });
 
         return response()->json([
             'promedioPorCarrera' => $promedioPorCarrera,
@@ -136,7 +171,8 @@ class EvaluacionDocenteController extends Controller
         $validatedData = $request->validate([
         'docente_id' => 'required|exists:docentes,id',
         'carrera_id' => 'required|exists:carreras,id',
-        'semestre'   => 'required|string|max:20',
+        'periodo'   => 'required|in:ENE-JUN,AGO-DIC',
+        'anio'      => 'required|digits:4|integer|min:2000|max:' . (date('Y') + 1),
 
         'dominio_asignatura'   => 'required|numeric|min:1|max:10',
         'planificacion_curso'   => 'required|numeric|min:1|max:10',
@@ -172,7 +208,8 @@ class EvaluacionDocenteController extends Controller
         $validatedData = $request->validate([
         'docente_id' => 'required|exists:docentes,id',
         'carrera_id' => 'required|exists:carreras,id',
-        'semestre'   => 'required|string|max:20',
+        'periodo'   => 'required|in:ENE-JUN,AGO-DIC',
+        'anio'      => 'required|digits:4|integer|min:2000|max:' . (date('Y') + 1),
 
         'dominio_asignatura'   => 'required|numeric|min:1|max:10',
         'planificacion_curso'   => 'required|numeric|min:1|max:10',

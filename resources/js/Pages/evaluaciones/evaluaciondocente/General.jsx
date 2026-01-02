@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { usePage } from "@inertiajs/react";
 import axios from "axios";
-import { 
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, 
-  LineChart, Line, Legend, PieChart, Pie, Cell 
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
 } from "recharts";
 import { TrendingUp, Award, Calendar } from "lucide-react";
 
@@ -13,256 +19,293 @@ export default function General() {
   const [promediosSemestre, setPromediosSemestre] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // NUEVO: Estados para los filtros
+  const [periodoFiltro, setPeriodoFiltro] = useState("");
+  const [anioFiltro, setAnioFiltro] = useState("");
+  const [evaluacionesTodas, setEvaluacionesTodas] = useState([]);
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    
-    // RUTA CORREGIDA
-    axios.get('/evaluaciones/evaluaciondocente/data/general')
+    axios.get("/evaluaciones/evaluaciondocente/data/general")
       .then(res => {
-        console.log("Datos generales recibidos:", res.data);
         setDataCarreras(res.data.promedioPorCarrera || []);
         setPromediosSemestre(res.data.promediosSemestre || []);
+        setEvaluacionesTodas(res.data.evaluacionesTodas || []); // Si tu backend lo proporciona
       })
-      .catch(err => {
-        console.error("Error al cargar datos generales:", err);
-        setError("Error al cargar los datos generales");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .catch(() => setError("Error al cargar los datos generales"))
+      .finally(() => setLoading(false));
   }, []);
 
-  // Colores para las gráficas
-  const COLORS = ['#991b1b', '#dc2626', '#ef4444', '#f87171', '#fca5a5', '#fecaca'];
+  // NUEVO: Obtener periodos y años únicos
+  const periodosUnicos = [...new Set(promediosSemestre.map(p => p.periodo))].filter(Boolean).sort();
+  const aniosUnicos = [...new Set(promediosSemestre.map(p => p.anio))].filter(Boolean).sort((a, b) => b - a);
 
-  // Calcular estadísticas
-  const promedioGeneral = dataCarreras.length > 0
-    ? (dataCarreras.reduce((acc, curr) => acc + parseFloat(curr.promedio), 0) / dataCarreras.length).toFixed(2)
+  // NUEVO: Filtrar promedios por semestre según filtros
+  const promediosSemestreFiltrados = promediosSemestre.filter(p => {
+    const cumplePeriodo = !periodoFiltro || p.periodo === periodoFiltro;
+    const cumpleAnio = !anioFiltro || p.anio == anioFiltro;
+    return cumplePeriodo && cumpleAnio;
+  });
+
+  const promedioGeneral = dataCarreras.length
+    ? (
+        dataCarreras.reduce((a, b) => a + parseFloat(b.promedio), 0) /
+        dataCarreras.length
+      ).toFixed(2)
     : "0.00";
 
-  const mejorCarrera = dataCarreras.length > 0
-    ? dataCarreras.reduce((max, curr) => parseFloat(curr.promedio) > parseFloat(max.promedio) ? curr : max, dataCarreras[0])
+  const mejorCarrera = dataCarreras.length
+    ? dataCarreras.reduce((max, curr) =>
+        parseFloat(curr.promedio) > parseFloat(max.promedio) ? curr : max
+      )
     : null;
+  
+  const getColorClass = (valor) => {
+    const v = parseFloat(valor);
+    
+    if (isNaN(v)) return "bg-gray-100 text-gray-800";
+    
+    if (v < 3.25) return "bg-red-100 text-red-800 font-semibold";
+    if (v < 3.75) return "bg-orange-100 text-orange-800 font-semibold";
+    if (v < 4.25) return "bg-yellow-100 text-yellow-800 font-semibold";
+    if (v < 4.75) return "bg-blue-100 text-blue-800 font-semibold";
+    return "bg-green-100 text-green-800 font-semibold";
+  };
 
-  const totalSemestres = promediosSemestre.length;
+  const getEtiquetaEvaluacion = (valor) => {
+    const v = parseFloat(valor);
+    
+    if (v < 3.25) return "Insatisfactorio";
+    if (v < 3.75) return "Suficiente";
+    if (v < 4.25) return "Bueno";
+    if (v < 4.75) return "Notable";
+    return "Sobresaliente";
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      {/* Encabezado */}
-      <div className="bg-gradient-to-r from-red-800 to-red-900 rounded-xl p-6 mb-8 shadow-md">
+      {/* 🔴 ENCABEZADO */}
+      <div className="bg-red-800 rounded-xl p-6 mb-8 shadow-md">
         <h1 className="text-3xl font-bold text-white text-center">
           Evaluación General Institucional
         </h1>
-        <p className="text-yellow-200 text-center mt-2">
-          Vista panorámica del desempeño académico en todas las carreras
-        </p>
       </div>
 
       <div className="max-w-7xl mx-auto">
-        {/* Mensaje de error */}
+        
+        {/* NUEVO: Filtros */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">Filtros de Visualización</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Filtro de Periodo */}
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">
+                Filtrar por Periodo:
+              </label>
+              <select
+                value={periodoFiltro}
+                onChange={e => setPeriodoFiltro(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-red-500"
+              >
+                <option value="">Todos los periodos</option>
+                {periodosUnicos.map(periodo => (
+                  <option key={periodo} value={periodo}>{periodo}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filtro de Año */}
+            <div>
+              <label className="block text-gray-700 font-semibold mb-2">
+                Filtrar por Año:
+              </label>
+              <select
+                value={anioFiltro}
+                onChange={e => setAnioFiltro(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-red-500"
+              >
+                <option value="">Todos los años</option>
+                {aniosUnicos.map(anio => (
+                  <option key={anio} value={anio}>{anio}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Botón Limpiar */}
+            <div className="flex items-end">
+              {(periodoFiltro || anioFiltro) && (
+                <button
+                  onClick={() => {
+                    setPeriodoFiltro("");
+                    setAnioFiltro("");
+                  }}
+                  className="w-full bg-gray-500 text-white px-4 py-3 rounded-lg hover:bg-gray-600 transition"
+                >
+                  Limpiar Filtros
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Información de filtros activos */}
+          {(periodoFiltro || anioFiltro) && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-blue-800 font-medium">
+                Filtros activos:
+                {periodoFiltro && <span className="ml-2">Periodo: <span className="font-bold">{periodoFiltro}</span></span>}
+                {anioFiltro && <span className="ml-2">Año: <span className="font-bold">{anioFiltro}</span></span>}
+              </p>
+              <p className="text-blue-600 text-sm mt-1">
+                {promediosSemestreFiltrados.length} periodo(s) encontrado(s)
+              </p>
+            </div>
+          )}
+        </div>
+
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-red-100 border border-red-400 text-red-700 p-4 rounded-lg mb-6">
             {error}
           </div>
         )}
 
-        {/* Loading */}
         {loading && (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-red-800"></div>
-            <p className="mt-4 text-gray-600 text-lg">Cargando datos institucionales...</p>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-red-800"></div>
+            <p className="mt-4 text-gray-600">Cargando datos...</p>
           </div>
         )}
 
         {!loading && (
           <>
-            {/* Tarjetas de estadísticas */}
+            {/* 📌 TARJETAS */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-600 text-sm font-medium mb-1">Promedio General</p>
-                    <p className="text-4xl font-bold text-green-600">{promedioGeneral}</p>
-                    <p className="text-gray-500 text-xs mt-1">De todas las carreras</p>
-                  </div>
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <Award className="w-8 h-8 text-green-600" />
-                  </div>
-                </div>
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <p className="text-gray-600 text-sm">Promedio General</p>
+                <p className="text-3xl font-bold text-green-600">{promedioGeneral}</p>
               </div>
 
-              <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-600 text-sm font-medium mb-1">Mejor Carrera</p>
-                    <p className="text-xl font-bold text-blue-600">
-                      {mejorCarrera ? mejorCarrera.carrera : "N/A"}
-                    </p>
-                    <p className="text-gray-500 text-xs mt-1">
-                      Promedio: {mejorCarrera ? mejorCarrera.promedio : "0"}
-                    </p>
-                  </div>
-                  <div className="bg-blue-100 p-3 rounded-full">
-                    <TrendingUp className="w-8 h-8 text-blue-600" />
-                  </div>
-                </div>
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <p className="text-gray-600 text-sm">Mejor Carrera</p>
+                <p className="text-xl font-bold text-blue-600">
+                  {mejorCarrera?.carrera || "—"}
+                </p>
               </div>
 
-              <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-600 text-sm font-medium mb-1">Semestres Evaluados</p>
-                    <p className="text-4xl font-bold text-purple-600">{totalSemestres}</p>
-                    <p className="text-gray-500 text-xs mt-1">Períodos registrados</p>
-                  </div>
-                  <div className="bg-purple-100 p-3 rounded-full">
-                    <Calendar className="w-8 h-8 text-purple-600" />
-                  </div>
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <p className="text-gray-600 text-sm">Periodos Evaluados</p>
+                <p className="text-3xl font-bold text-purple-600">
+                  {promediosSemestreFiltrados.length || promediosSemestre.length}
+                </p>
+              </div>
+            </div>
+
+            {/* 📊 GRÁFICA PRINCIPAL CENTRADA */}
+            <div className="grid md:grid-cols-2 gap-6 mb-8 max-w-6xl mx-auto">
+              <div className="md:col-span-2 flex justify-center">
+                <div className="w-full max-w-4xl bg-white rounded-xl shadow-lg p-6">
+                  <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
+                    Promedio por Carrera
+                    {(periodoFiltro || anioFiltro) && (
+                      <span className="text-sm text-gray-600 block mt-1">
+                        {periodoFiltro && `${periodoFiltro} `}
+                        {anioFiltro && `${anioFiltro}`}
+                      </span>
+                    )}
+                  </h2>
+
+                  {dataCarreras.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={350}>
+                      <BarChart data={dataCarreras}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="carrera"
+                          angle={-45}
+                          textAnchor="end"
+                          height={100}
+                          interval={0}
+                        />
+                        <YAxis domain={[0, 5]} />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="promedio" fill="#991b1b" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <p className="text-gray-500 text-center py-8">
+                      No hay datos disponibles
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Gráficas principales */}
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              {/* Gráfica: Promedio por Carrera */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <div className="w-1 h-6 bg-red-800 rounded"></div>
-                  Promedio por Carrera
+            {/* NUEVO: Gráfica de evolución por semestre */}
+            {promediosSemestreFiltrados.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">
+                  Evolución de Promedios por Periodo
                 </h2>
-                {dataCarreras.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={350}>
-                    <BarChart data={dataCarreras}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="carrera" 
-                        angle={-45} 
-                        textAnchor="end" 
-                        height={120}
-                        interval={0}
-                        tick={{ fontSize: 12 }}
-                      />
-                      <YAxis domain={[0, 5]} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="promedio" fill="#991b1b" name="Promedio" radius={[8, 8, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <p className="text-gray-500 text-center py-12">No hay datos disponibles</p>
-                )}
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={promediosSemestreFiltrados}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="semestre_completo"
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                    />
+                    <YAxis domain={[0, 5]} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="promedio" fill="#3b82f6" name="Promedio General" />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
+            )}
 
-              {/* Gráfica: Evolución por Semestre */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <div className="w-1 h-6 bg-green-600 rounded"></div>
-                  Evolución por Semestre
-                </h2>
-                {promediosSemestre.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={350}>
-      <BarChart data={promediosSemestre}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="semestre" />
-        <YAxis domain={[0, 10]} />
-        <Tooltip />
-        <Legend />
-
-        <Bar
-          dataKey="promedio"
-          name="Promedio General"
-          fill="#16a34a"
-          radius={[6, 6, 0, 0]} // Bordes superiores redondeados
-        />
-      </BarChart>
-    </ResponsiveContainer>
-                ) : (
-                  <p className="text-gray-500 text-center py-12">No hay datos disponibles</p>
-                )}
-              </div>
-            </div>
-
-            {/* Tabla detallada de carreras */}
+            {/* 📋 TABLA */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <div className="w-1 h-6 bg-blue-600 rounded"></div>
-                Tabla Comparativa por Carrera
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                Tabla Detallada por Carrera
               </h2>
+
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm border-collapse">
                   <thead className="bg-gray-100">
                     <tr>
-                      <th className="text-left p-4 font-semibold text-gray-700">Posición</th>
-                      <th className="text-left p-4 font-semibold text-gray-700">Carrera</th>
-                      <th className="text-left p-4 font-semibold text-gray-700">Promedio</th>
-                      <th className="text-left p-4 font-semibold text-gray-700">Evaluación</th>
+                      <th className="p-3 border border-gray-300">Carrera</th>
+                      <th className="p-3 border border-gray-300 text-center">Promedio</th>
+                      <th className="p-3 border border-gray-300 text-center">Evaluación</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {dataCarreras
-                      .sort((a, b) => parseFloat(b.promedio) - parseFloat(a.promedio))
-                      .map((carrera, idx) => {
-                        const promedio = parseFloat(carrera.promedio);
-                        let evaluacion = "Excelente";
-                        let colorClass = "text-green-600 bg-green-50";
-                        
-                        if (promedio < 3.25) {
-                          evaluacion = "Insuficiente";
-                          colorClass = "text-red-600 bg-red-50";
-                        } else if (promedio < 3.75) {
-                          evaluacion = "Suficiente";
-                          colorClass = "text-orange-600 bg-orange-50";
-                        } else if (promedio < 4.25) {
-                          evaluacion = "Bueno";
-                          colorClass = "text-yellow-600 bg-yellow-50";
-                        } else if (promedio < 4.75) {
-                          evaluacion = "Notable";
-                          colorClass = "text-blue-600 bg-blue-50";
-                        }
 
-                        return (
-                          <tr key={carrera.carrera_id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                            <td className="p-4">
-                              <span className="font-bold text-gray-600">#{idx + 1}</span>
-                            </td>
-                            <td className="p-4 font-medium">{carrera.carrera}</td>
-                            <td className="p-4">
-                              <span className="font-bold text-2xl text-red-800">
-                                {carrera.promedio}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${colorClass}`}>
-                                {evaluacion}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                  <tbody>
+                    {dataCarreras.map((carrera) => (
+                      <tr key={carrera.carrera_id} className="hover:bg-gray-50">
+                        <td className="p-3 border border-gray-300 font-bold">
+                          {carrera.carrera}
+                        </td>
+
+                        <td className={`p-3 border border-gray-300 text-center ${getColorClass(carrera.promedio)}`}>
+                          {parseFloat(carrera.promedio).toFixed(2)}
+                        </td>
+
+                        <td className="p-3 border border-gray-300 text-center font-semibold">
+                          {getEtiquetaEvaluacion(carrera.promedio)}
+                        </td>
+                      </tr>
+                    ))}
+
                     {dataCarreras.length === 0 && (
                       <tr>
-                        <td colSpan="4" className="text-center p-8 text-gray-500">
-                          No hay datos de carreras disponibles
+                        <td colSpan="3" className="text-center p-8 text-gray-500">
+                          No hay datos disponibles
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
-              </div>
-            </div>
-
-            {/* Información adicional */}
-            <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
-              <div className="text-center">
-                <h3 className="text-lg font-bold text-gray-800 mb-2">
-                  📊 Análisis Institucional Completo
-                </h3>
-                <p className="text-gray-600">
-                  Este reporte muestra el desempeño general de todas las carreras evaluadas.
-                  Los datos se actualizan automáticamente con cada nueva evaluación registrada.
-                </p>
               </div>
             </div>
           </>

@@ -51,13 +51,30 @@ export default function Index( {evaluaciones}) {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
             {/* Encabezado Principal */}
             <div className="max-w-7xl mx-auto mb-12">
-                <div className="text-center mb-8">
-                    <h1 className="text-5xl font-bold text-gray-800 mb-3">
-                        Sistema de Evaluación Docente
-                    </h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Analiza, compara y mejora el desempeño académico institucional
-                    </p>
+                <div className="text-center mb-8 relative">
+                    {/* Logo izquierdo */}
+                    <img 
+                        src="/storage/ITSZO.webp" 
+                        alt="Logo Izquierdo" 
+                        className="absolute left-0 top-1/2 -translate-y-1/2 h-40 w-40 object-contain"
+                    />
+                    
+                    {/* Contenido central */}
+                    <div className="px-32">
+                        <h1 className="text-5xl font-bold text-gray-800 mb-3">
+                            Sistema de Evaluación Docente
+                        </h1>
+                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                            Analiza, compara y mejora el desempeño académico institucional
+                        </p>
+                    </div>
+
+                    {/* Logo derecho */}
+                    <img 
+                        src="/storage/ITSZO.webp" 
+                        alt="Logo Derecho" 
+                        className="absolute right-0 top-1/2 -translate-y-1/2 h-40 w-40 object-contain"
+                    />
                 </div>
 
                 {/* Línea decorativa */}
@@ -67,15 +84,13 @@ export default function Index( {evaluaciones}) {
 
                 {/* Contenedor de los botones */}
                 <div className="flex justify-center gap-6 mb-12">
-
-                {/* Botón: Crear Evaluación */}
-                <Link
-                    href="/evaluaciones/evaluaciondocente/create"
-                    className="px-6 py-3 bg-green-700 text-white font-semibold rounded-lg shadow-md hover:bg-green-800 transition"
-                >
-                    Nueva Evaluación
-                </Link>
-
+                    {/* Botón: Crear Evaluación */}
+                    <Link
+                        href="/evaluaciones/evaluaciondocente/create"
+                        className="bg-red-800 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition"
+                    >
+                        Nueva Evaluación
+                    </Link>
                 </div>
             </div>
 
@@ -149,56 +164,58 @@ export default function Index( {evaluaciones}) {
                     </p>
                 </div>
                 {/* LISTA DE EVALUACIONES */}
-<div className="max-w-7xl mx-auto mt-10">
-    <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-        Evaluaciones Registradas
-    </h2>
+                <div className="max-w-7xl mx-auto mt-10">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+                        Evaluaciones Registradas
+                    </h2>
 
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="w-full text-left">
-            <thead className="bg-gray-100 text-gray-600">
-                <tr>
-                    <th className="p-3">Docente</th>
-                    <th className="p-3">Carrera</th>
-                    <th className="p-3">Semestre</th>
-                    <th className="p-3 text-center">Acciones</th>
-                </tr>
-            </thead>
+                    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-100 text-gray-600">
+                                <tr>
+                                    <th className="p-3">Docente</th>
+                                    <th className="p-3">Carrera</th>
+                                    <th className="p-3">Semestre</th>
+                                    <th className="p-3">Año</th>
+                                    <th className="p-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
 
-            <tbody>
-                {evaluaciones.map((evaluacion) => (
-                    <tr key={evaluacion.id} className="border-b hover:bg-gray-50">
-                        <td className="p-3">
-                        {evaluacion.docente && `${evaluacion.docente.nombres} ${evaluacion.docente.apellido_paterno} ${evaluacion.docente.apellido_materno}`}
-                        </td>
-                        <td className="p-3">{evaluacion.carrera?.nombre}</td>
-                        <td className="p-3">{evaluacion.semestre}</td>
+                            <tbody>
+                                {evaluaciones.map((evaluacion) => (
+                                    <tr key={evaluacion.id} className="border-b hover:bg-gray-50">
+                                        <td className="p-3">
+                                        {evaluacion.docente && `${evaluacion.docente.nombres} ${evaluacion.docente.apellido_paterno} ${evaluacion.docente.apellido_materno}`}
+                                        </td>
+                                        <td className="p-3">{evaluacion.carrera?.nombre}</td>
+                                        <td className="p-3">{evaluacion.periodo}</td>
+                                        <td className="p-3">{evaluacion.anio}</td>
 
-                        <td className="p-3 flex justify-center gap-4">
+                                        <td className="p-3 flex justify-center gap-4">
 
-                            {/* EDITAR */}
-                            <Link
-                                href={`/evaluaciones/evaluaciondocente/${evaluacion.id}/edit`}
-                                className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition"
-                            >
-                                Editar
-                            </Link>
+                                            {/* EDITAR */}
+                                            <Link
+                                                href={`/evaluaciones/evaluaciondocente/${evaluacion.id}/edit`}
+                                                className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition"
+                                            >
+                                                Editar
+                                            </Link>
 
-                            {/* ELIMINAR */}
-                            <button
-                                onClick={() => handleDelete(evaluacion.id)}
-                                className="px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition"
-                            >
-                                Eliminar
-                            </button>
+                                            {/* ELIMINAR */}
+                                            <button
+                                                onClick={() => handleDelete(evaluacion.id)}
+                                                className="px-4 py-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition"
+                                            >
+                                                Eliminar
+                                            </button>
 
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-</div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     );

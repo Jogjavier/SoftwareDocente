@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
-import { Inertia } from '@inertiajs/inertia';
+import { router } from "@inertiajs/react";
 
 export default function Edit({ evaluacion, docentes, carreras }) {
 
     const [carrera_id, setCarreraId] = useState(evaluacion.carrera_id ?? "");
     const [docente_id, setDocenteId] = useState(evaluacion.docente_id ?? "");
 
-    const [semestre, setSemestre] = useState(evaluacion.semestre ?? "");
+    const [periodo, setPeriodo] = useState(evaluacion.periodo ?? "");
+    const [anio, setAnio] = useState(evaluacion.anio ?? "");
     const [dominio_asignatura, setDominioAsignatura] = useState(evaluacion.dominio_asignatura ?? "");
     const [planificacion_curso, setPlanificacionCurso] = useState(evaluacion.planificacion_curso ?? "");
     const [ambiente_aprendizaje, setAmbienteAprendizaje] = useState(evaluacion.ambiente_aprendizaje ?? "");
     const [estrategias_metodos, setEstrategiasMetodos] = useState(evaluacion.estrategias_metodos ?? "");
     const [motivacion, setMotivacion] = useState(evaluacion.motivacion ?? "");
-    const [evaluacionCampo, setEvaluacionCampo] = useState(evaluacion.evaluacion ?? "");
+    const [evaluacion_campo, setEvaluacionCampo] = useState(evaluacion.evaluacion ?? ""); // RENOMBRADO
     const [comunicacion, setComunicacion] = useState(evaluacion.comunicacion ?? "");
     const [gestion_recurso, setGestionRecurso] = useState(evaluacion.gestion_recurso ?? "");
     const [tecnologias, setTecnologias] = useState(evaluacion.tecnologias ?? "");
@@ -27,7 +28,7 @@ export default function Edit({ evaluacion, docentes, carreras }) {
             ambiente_aprendizaje,
             estrategias_metodos,
             motivacion,
-            evaluacionCampo,
+            evaluacion_campo, // ACTUALIZADO
             comunicacion,
             gestion_recurso,
             tecnologias,
@@ -48,7 +49,7 @@ export default function Edit({ evaluacion, docentes, carreras }) {
         ambiente_aprendizaje,
         estrategias_metodos,
         motivacion,
-        evaluacionCampo,
+        evaluacion_campo, // ACTUALIZADO
         comunicacion,
         gestion_recurso,
         tecnologias,
@@ -61,17 +62,17 @@ export default function Edit({ evaluacion, docentes, carreras }) {
     // Envio del formulario
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        Inertia.put(`/evaluaciones/evaluaciondocente/${evaluacion.id}`, {
+        router.put(`/evaluaciones/evaluaciondocente/${evaluacion.id}`, {
             docente_id,
             carrera_id,
-            semestre,
+            periodo,
+            anio,
             dominio_asignatura,
             planificacion_curso,
             ambiente_aprendizaje,
             estrategias_metodos,
             motivacion,
-            evaluacion: evaluacionCampo,
+            evaluacion: evaluacion_campo, // ACTUALIZADO
             comunicacion,
             gestion_recurso,
             tecnologias,
@@ -134,15 +135,36 @@ export default function Edit({ evaluacion, docentes, carreras }) {
                             </select>
                         </div>
 
-                        {/* Semestre */}
+                        {/* Periodo */}
                         <div>
-                            <label className="block mb-2 text-gray-700 font-medium">Semestre:</label>
+                            <label className="block font-semibold text-gray-700 mb-2">
+                                Periodo:
+                            </label>
+                            <select
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
+                                value={periodo}
+                                onChange={(e) => setPeriodo(e.target.value)}
+                                required
+                            >
+                                <option value="">Seleccione el periodo</option>
+                                <option value="ENE-JUN">ENE - JUN</option>
+                                <option value="AGO-DIC">AGO - DIC</option>
+                            </select>
+                        </div>
+
+                        {/* Año */}
+                        <div>
+                            <label className="block font-semibold text-gray-700 mb-2">
+                                Año:
+                            </label>
                             <input
-                                type="text"
-                                value={semestre}
-                                onChange={(e) => setSemestre(e.target.value)}
-                                className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-red-500"
-                                maxLength={18}
+                                type="number"
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
+                                value={anio}
+                                onChange={(e) => setAnio(e.target.value)}
+                                min="2000"
+                                max="2100"
+                                placeholder="2024"
                                 required
                             />
                         </div>
@@ -153,7 +175,7 @@ export default function Edit({ evaluacion, docentes, carreras }) {
                         <InputNumber label="Ambiente de aprendizaje" value={ambiente_aprendizaje} setValue={setAmbienteAprendizaje} />
                         <InputNumber label="Estrategias y métodos" value={estrategias_metodos} setValue={setEstrategiasMetodos} />
                         <InputNumber label="Motivación" value={motivacion} setValue={setMotivacion} />
-                        <InputNumber label="Evaluación" value={evaluacionCampo} setValue={setEvaluacionCampo} />
+                        <InputNumber label="Evaluación" value={evaluacion_campo} setValue={setEvaluacionCampo} /> {/* ACTUALIZADO */}
                         <InputNumber label="Comunicación" value={comunicacion} setValue={setComunicacion} />
                         <InputNumber label="Gestión del recurso" value={gestion_recurso} setValue={setGestionRecurso} />
                         <InputNumber label="Tecnologías" value={tecnologias} setValue={setTecnologias} />
@@ -182,7 +204,7 @@ export default function Edit({ evaluacion, docentes, carreras }) {
 
                             <button
                                 type="button"
-                                onClick={() => window.history.back()}
+                                onClick={() => router.visit('/evaluaciones/evaluaciondocente')}
                                 className="flex-1 bg-gray-300 text-gray-800 hover:bg-gray-400 px-6 py-3 rounded-lg font-semibold transition"
                             >
                                 Cancelar
