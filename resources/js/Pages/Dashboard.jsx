@@ -39,7 +39,11 @@ const modules = [
       },
       {
         name: "Evaluación departamental",
-        route: "/evaluaciones/departamental",
+        route: "/evaluaciones/evaluaciondepartamental",
+      },
+      {
+        name: "Registrar evaluación departamental",
+        route: "/evaluaciones/evaluaciondepartamental/create",
       },
     ],
   },

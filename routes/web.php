@@ -11,6 +11,7 @@ use App\Http\Controllers\ExperienciaDocenteController;
 use App\Http\Controllers\ConstanciaController;
 use App\Http\Controllers\EvaluacionDocenteController;
 use App\Http\Controllers\ActivarDocenteController;
+use App\Http\Controllers\EvaluacionDepartamentalController;
 
 Route::get('/', function () {
     return Inertia::render('Dashboard');
@@ -44,8 +45,6 @@ Route::prefix('docentes')->name('docentes.')->group(function () {
 });
 Route::resource('docentes.niveles', NivelEstudioController::class)->shallow();
 Route::resource('docentes.experiencias', ExperienciaDocenteController::class);
-Route::resource('capacitaciones/cursointerno', CursoInternoController::class);
-Route::resource('capacitaciones/cursoexterno', CursoExternoController::class);
 
 // Constancias
 Route::prefix('capacitaciones/constancia')->name('capacitaciones.constancia.')->group(function () {
@@ -73,6 +72,23 @@ Route::prefix('evaluaciones/evaluaciondocente')->name('evaluaciones.evaluaciondo
     Route::get('/data/docente/{id}', [EvaluacionDocenteController::class, 'dataPorDocente'])->name('data.docente');
     Route::get('/data/carrera/{carreraId}', [EvaluacionDocenteController::class, 'dataPorCarrera'])->name('data.carrera');
     Route::get('/data/general', [EvaluacionDocenteController::class, 'dataGeneral'])->name('data.general');
+});
+// Evaluacion Departamental
+Route::prefix('evaluaciones/evaluaciondepartamental')->name('evaluaciones.evaluaciondepartamental.')->group(function () {
+    Route::get('/', [EvaluacionDepartamentalController::class, 'index'])->name('index'); // Cambié '/index' a '/'
+    Route::get('/create', [EvaluacionDepartamentalController::class, 'create'])->name('create');
+    Route::post('/', [EvaluacionDepartamentalController::class, 'store'])->name('store');
+    Route::get('/{evaluaciondepartamental}/edit', [EvaluacionDepartamentalController::class, 'edit'])->name('edit');
+    Route::put('/{evaluaciondepartamental}', [EvaluacionDepartamentalController::class, 'update'])->name('update');
+    Route::delete('/{evaluaciondepartamental}', [EvaluacionDepartamentalController::class, 'destroy'])->name('destroy');
+    Route::get('/por-docente', [EvaluacionDepartamentalController::class, 'porDocente'])->name('porDocente');
+    Route::get('/por-carrera', [EvaluacionDepartamentalController::class, 'porCarrera'])->name('porCarrera');
+    Route::get('/general', [EvaluacionDepartamentalController::class, 'general'])->name('general');
+    
+    // Rutas para obtener datos (API endpoints)
+    Route::get('/data/docente/{id}', [EvaluacionDepartamentalController::class, 'dataPorDocente'])->name('data.docente');
+    Route::get('/data/carrera/{carreraId}', [EvaluacionDepartamentalController::class, 'dataPorCarrera'])->name('data.carrera');
+    Route::get('/data/general', [EvaluacionDepartamentalController::class, 'dataGeneral'])->name('data.general');
 });
 // Capacitaciones
 Route::prefix('capacitaciones')->name('capacitaciones.')->group(function () {

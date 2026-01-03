@@ -26,7 +26,7 @@ export default function General() {
   const [evaluacionesTodas, setEvaluacionesTodas] = useState([]);
 
   useEffect(() => {
-    axios.get("/evaluaciones/evaluaciondocente/data/general")
+    axios.get("/evaluaciones/evaluaciondepartamental/data/general")
       .then(res => {
         setDataCarreras(res.data.promedioPorCarrera || []);
         setPromediosSemestre(res.data.promediosSemestre || []);
