@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Inertia } from "@inertiajs/inertia";
+import { router } from "@inertiajs/react";
 
 export default function Create({ carreras}) {
   // Docente data
@@ -397,7 +397,7 @@ export default function Create({ carreras}) {
           <div className="flex gap-4">
             <button
               onClick={handleSubmit}
-              className="flex-1 bg-red-800 text-yellow-400 hover:bg-red-700 hover:text-yellow-300 px-6 py-3 rounded-lg font-semibold transition"
+              className="flex-1 bg-red-800 text-white hover:bg-red-700 hover:text-yellow-300 px-6 py-3 rounded-lg font-semibold transition"
             >
               Guardar Docente
             </button>

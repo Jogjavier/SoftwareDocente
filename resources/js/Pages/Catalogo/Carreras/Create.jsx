@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Inertia } from "@inertiajs/inertia";
+import { router } from "@inertiajs/react";
 export default function Create() {
   const [nombre, setNombre] = useState("");
   const [siglas, setSiglas] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    Inertia.post("/catalogo/carreras", { nombre, siglas });
+    router.post("/catalogo/carreras", { nombre, siglas });
     console.log("Creando carrera:", { nombre, siglas });
     alert("Carrera creada exitosamente!");
     setNombre("");
@@ -50,7 +50,7 @@ export default function Create() {
           <button 
             type="submit" 
             onClick={handleSubmit}
-            className="w-full bg-red-800 text-yellow-400 hover:bg-red-700 hover:text-yellow-300 px-6 py-3 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
+            className="w-full bg-red-800 text-white hover:bg-red-700 hover:text-yellow-300 px-6 py-3 rounded-lg font-semibold transition-colors duration-200 shadow-md hover:shadow-lg"
           >
             Guardar
           </button>

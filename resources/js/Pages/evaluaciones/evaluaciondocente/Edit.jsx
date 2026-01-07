@@ -197,7 +197,7 @@ export default function Edit({ evaluacion, docentes, carreras }) {
                         <div className="flex gap-4 col-span-2 mt-4">
                             <button
                                 type="submit"
-                                className="flex-1 bg-red-800 text-yellow-400 hover:bg-red-700 px-6 py-3 rounded-lg font-semibold transition"
+                                className="flex-1 bg-red-800 text-white hover:bg-red-700 px-6 py-3 rounded-lg font-semibold transition"
                             >
                                 Actualizar Evaluación
                             </button>

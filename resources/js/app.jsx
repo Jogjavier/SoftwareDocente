@@ -6,7 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Software de Profesionalizacion Docente';
-
+<meta name="csrf-token" content={document.querySelector('meta[name="csrf-token"]')?.content || ''} />
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) =>

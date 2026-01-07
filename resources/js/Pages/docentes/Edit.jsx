@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaGraduationCap, FaSave, FaArrowLeft } from "react-icons/fa";
-import { Inertia } from "@inertiajs/inertia";
+import { router } from "@inertiajs/react";
 
 export default function Edit({ docente, carreras }) {
   const [form, setForm] = useState({
@@ -123,14 +123,14 @@ export default function Edit({ docente, carreras }) {
       }
     });
 
-    Inertia.post(`/docentes/${docente.id}`, formData, {
+    router.post(`/docentes/${docente.id}`, formData, {
       forceFormData: true,
       onFinish: () => setLoading(false),
     });
   };
 
   const handleCancel = () => {
-    Inertia.visit("/docentes/index");
+    router.visit("/docentes/index");
   };
 
   return (
@@ -480,7 +480,7 @@ export default function Edit({ docente, carreras }) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-red-800 hover:bg-red-700 disabled:bg-gray-400 text-yellow-400 font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg"
+              className="flex-1 bg-red-800 hover:bg-red-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center space-x-2 shadow-md hover:shadow-lg"
             >
               {loading ? (
                 <>

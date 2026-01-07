@@ -22,7 +22,7 @@ Route::get('/dashboard', function () {
 });
 
 // Carreras
-Route::prefix('catalogo/carreras')->name('carreras.')->group(function () {
+Route::prefix('catalogo/carreras')->name('catalogo.carreras.')->group(function () {
     Route::get('/index', [CarreraController::class, 'index'])->name('index');
     Route::get('/create', [CarreraController::class, 'create'])->name('create');
     Route::post('/', [CarreraController::class, 'store'])->name('store');
@@ -85,6 +85,10 @@ Route::prefix('capacitaciones')->name('capacitaciones.')->group(function () {
     Route::get('/index', [ConstanciaController::class, 'index'])->name('index');
     Route::get('/create', [ConstanciaController::class, 'create'])->name('create');
     Route::post('/', [ConstanciaController::class, 'store'])->name('store');
+    Route::get('/{id}/constancia-facilitador', [ConstanciaController::class, 'createFacilitador'])
+        ->name('facilitador.create');
+    Route::post('/constancia-facilitador/generar', [ConstanciaController::class, 'generateFacilitador'])
+        ->name('facilitador.generate');
     Route::get('/{constancia}/edit', [ConstanciaController::class, 'edit'])->name('edit');
     Route::put('/{constancia}', [ConstanciaController::class, 'update'])->name('update');
     Route::get('/{constancia}', [ConstanciaController::class, 'show'])->name('show');

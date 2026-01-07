@@ -1,22 +1,22 @@
 import React, { useState } from "react";
-import { Inertia } from "@inertiajs/inertia";
+import { router } from "@inertiajs/react";
 
 export default function Index({ carreras = [], filters = {} }) {
   const [search, setSearch] = useState(filters.search || "");
 
   const handleDelete = (id) => {
     if (confirm("¿Seguro que deseas eliminar esta carrera?")) {
-      Inertia.delete(`/catalogo/carreras/${id}`);
+      router.delete(`/catalogo/carreras/${id}`);
     }
   };
 
   const handleEdit = (id) => {
-    Inertia.visit(`/catalogo/carreras/${id}/edit`);
+    router.visit(`/catalogo/carreras/${id}/edit`);
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    Inertia.get("/catalogo/carreras/index", { search });
+    router.get("/catalogo/carreras/index", { search });
   };
 
   return (
@@ -42,7 +42,7 @@ export default function Index({ carreras = [], filters = {} }) {
 
       <button
         onClick={() => router.visit("/")}
-        className="bg-yellow-400 text-red-800 px-4 py-2 rounded font-semibold hover:bg-yellow-300"
+        className="bg-yellow-400 text-white px-6 py-2 rounded-lg font-semibold hover:bg-yellow-600 transition"
       >
         Inicio
       </button>
@@ -62,6 +62,14 @@ export default function Index({ carreras = [], filters = {} }) {
           className="bg-red-800 text-white px-4 py-2 rounded hover:bg-red-700"
         >
           Buscar
+        </button>
+
+        <button
+          type="button"
+          onClick={() => router.visit("/catalogo/carreras/create")}
+          className="ml-auto bg-red-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition shadow-md whitespace-nowrap"
+        >
+          + Nueva Carrera
         </button>
       </form>
 

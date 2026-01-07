@@ -40,7 +40,7 @@ export default function Index({ constancias = [], filters }) {
                     </h1>
                     <button
                         onClick={() => router.visit("/")}
-                        className="bg-yellow-400 text-red-800 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition shadow-md"
+                        className="bg-yellow-400 text-white px-6 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition shadow-md"
                     >
                         Inicio
                     </button>
@@ -81,7 +81,7 @@ export default function Index({ constancias = [], filters }) {
                         </div>
                         <button
                             onClick={() => router.visit("/capacitaciones/create")}
-                            className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition shadow-md whitespace-nowrap"
+                            className="bg-red-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition shadow-md whitespace-nowrap"
                         >
                             + Nueva Capacitación
                         </button>

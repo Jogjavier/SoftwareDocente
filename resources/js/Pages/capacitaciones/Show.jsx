@@ -25,10 +25,10 @@ export default function Show({ constancia }) {
                         Detalle de Capacitación
                     </h1>
                     <button
-                        onClick={handleBack}
-                        className="bg-yellow-400 text-red-800 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-300 transition shadow-md"
+                        onClick={() => router.visit("/capacitaciones/index")}
+                        className="bg-yellow-400 text-white px-4 py-2 rounded font-semibold hover:bg-yellow-300"
                     >
-                        ← Volver al Listado
+                        Regresar
                     </button>
                 </div>
             </div>
@@ -69,16 +69,16 @@ export default function Show({ constancia }) {
                         </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={handleEdit}
-                                className="bg-yellow-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-yellow-600 transition shadow-md"
+                                onClick={() => router.visit("/capacitaciones/constancias/docentes")}
+                                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md"
                             >
-                                ✏️ Editar
+                                Generar Constancias de Docentes
                             </button>
                             <button
-                                onClick={handleDelete}
-                                className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition shadow-md"
+                                onClick={() => router.visit(`/capacitaciones/${constancia.id}/constancia-facilitador`)}
+                                className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition shadow-md"
                             >
-                                🗑️ Eliminar
+                                Generar Constancia de Facilitador
                             </button>
                         </div>
                     </div>

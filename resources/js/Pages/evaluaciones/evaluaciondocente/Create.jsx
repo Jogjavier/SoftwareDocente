@@ -206,7 +206,7 @@ export default function Create() {
                         <div className="flex gap-4 col-span-1 md:col-span-2 mt-4">
                             <button
                                 type="submit"
-                                className="flex-1 bg-red-800 text-yellow-400 hover:bg-red-700 hover:text-yellow-300 px-6 py-3 rounded-lg font-semibold transition"
+                                className="flex-1 bg-red-800 text-white hover:bg-red-700 hover:text-yellow-300 px-6 py-3 rounded-lg font-semibold transition"
                             >
                                 Guardar Evaluación
                             </button>

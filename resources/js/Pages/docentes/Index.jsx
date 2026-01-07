@@ -38,7 +38,7 @@ export default function Index({ docentes = [], filters = {} }) {
         <h1 className="text-3xl font-bold text-white">Listado de Docentes</h1>
         <button
           onClick={() => router.visit("/")}
-          className="bg-yellow-400 text-red-800 px-4 py-2 rounded font-semibold hover:bg-yellow-300"
+          className="bg-yellow-400 text-white px-4 py-2 rounded font-semibold hover:bg-yellow-300"
         >
           Inicio
         </button>
