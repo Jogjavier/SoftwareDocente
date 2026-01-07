@@ -47,18 +47,18 @@ class Docente extends Model
         return trim("{$this->nombres} {$this->apellido_paterno} {$this->apellido_materno}");
     }
 
-    public function cursosInternos()
-    {
-        return $this->belongsToMany(
-            CursoInterno::class, 
-            'curso_interno_docente', 
-            'docente_id', 
-            'curso_interno_id'
-        );
-    }
-
     public function evaluaciones()
     {
         return $this->hasMany(\App\Models\EvaluacionDocente::class);
+    }
+
+    public function capacitaciones()
+    {
+        return $this->belongsToMany(
+            Constancia::class,
+            'capacitacion_docente',
+            'docente_id',
+            'capacitacion_id'
+        );
     }
 }

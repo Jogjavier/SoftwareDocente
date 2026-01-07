@@ -12,7 +12,6 @@ class Constancia extends Model
         'nombre',
         'instructor',
         'autoridad_educativa',
-        'docente_id',
         'duracion_horas',
         'fecha_inicio',
         'fecha_fin',
@@ -22,4 +21,15 @@ class Constancia extends Model
         'modulo_horas',
         'modulo_calificacion',
     ];
+
+    public function docentes()
+    {
+        return $this->belongsToMany(
+            Docente::class,
+            'capacitacion_docente',
+            'capacitacion_id',
+            'docente_id'
+        );
+
+    }
 }

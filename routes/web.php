@@ -46,16 +46,6 @@ Route::prefix('docentes')->name('docentes.')->group(function () {
 Route::resource('docentes.niveles', NivelEstudioController::class)->shallow();
 Route::resource('docentes.experiencias', ExperienciaDocenteController::class);
 
-// Constancias
-Route::prefix('capacitaciones/constancia')->name('capacitaciones.constancia.')->group(function () {
-    Route::get('/index', [ConstanciaController::class, 'index'])->name('index');
-    Route::get('/create', [ConstanciaController::class, 'create'])->name('create');
-    Route::post('/', [ConstanciaController::class, 'store'])->name('store');
-    Route::get('/{constancia}/edit', [ConstanciaController::class, 'edit'])->name('edit');
-    Route::put('/{constancia}', [ConstanciaController::class, 'update'])->name('update');
-    Route::delete('/{constancia}', [ConstanciaController::class, 'destroy'])->name('destroy');
-});
-
 // Evaluacion Docente
 Route::prefix('evaluaciones/evaluaciondocente')->name('evaluaciones.evaluaciondocente.')->group(function () {
     Route::get('/', [EvaluacionDocenteController::class, 'index'])->name('index'); // Cambié '/index' a '/'
@@ -97,6 +87,7 @@ Route::prefix('capacitaciones')->name('capacitaciones.')->group(function () {
     Route::post('/', [ConstanciaController::class, 'store'])->name('store');
     Route::get('/{constancia}/edit', [ConstanciaController::class, 'edit'])->name('edit');
     Route::put('/{constancia}', [ConstanciaController::class, 'update'])->name('update');
+    Route::get('/{constancia}', [ConstanciaController::class, 'show'])->name('show');
     Route::delete('/{constancia}', [ConstanciaController::class, 'destroy'])->name('destroy');
 });
 // Activar Docente

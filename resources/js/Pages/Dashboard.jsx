@@ -54,11 +54,7 @@ const modules = [
       { name: "Registrar Curso", route: "/capacitaciones/create" },
       {
         name: "Ver Capacitaciones y Constancias",
-        route: "/capacitaciones/constancia/index",
-      },
-      {
-        name: "Generar Constancia",
-        route: "/capacitaciones/constancia/create",
+        route: "/capacitaciones/index",
       },
     ],
   },

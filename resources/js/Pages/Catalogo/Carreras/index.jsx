@@ -21,18 +21,32 @@ export default function Index({ carreras = [], filters = {} }) {
 
   return (
     <div className="min-h-screen bg-white p-6">
-      {/* Header */}
-      <div className="bg-red-800 rounded-xl p-6 mb-6 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white">Listado de Carreras</h1>
-
-        {/* Botón regresar al dashboard */}
-        <button
-          onClick={() => Inertia.visit("/")}
-          className="bg-yellow-400 text-red-800 px-4 py-2 rounded font-semibold hover:bg-yellow-300"
-        >
-          Inicio
-        </button>
+    {/* Header */}
+    <div className="bg-red-800 rounded-xl p-6 mb-6 flex justify-between items-center">
+      <div className="flex items-center gap-4">
+        <img 
+          src="/storage/logo.webp" 
+          alt="Logo" 
+          className="h-20 w-37 object-cover rounded"
+        />
+        <img 
+          src="/storage/ITSZO.webp" 
+          alt="Logo 2" 
+          className="h-20 w-37 object-cover rounded"
+        />
       </div>
+
+      <h1 className="text-3xl font-bold text-white">
+        Listado de Carreras
+      </h1>
+
+      <button
+        onClick={() => router.visit("/")}
+        className="bg-yellow-400 text-red-800 px-4 py-2 rounded font-semibold hover:bg-yellow-300"
+      >
+        Inicio
+      </button>
+    </div>
 
       {/* Barra de búsqueda */}
       <form onSubmit={handleSearch} className="mb-4 flex gap-2">
