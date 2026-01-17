@@ -82,15 +82,26 @@ Route::prefix('evaluaciones/evaluaciondepartamental')->name('evaluaciones.evalua
 });
 // Capacitaciones
 Route::prefix('capacitaciones')->name('capacitaciones.')->group(function () {
+    Route::get('/reporte', [ConstanciaController::class, 'reportePorPeriodo'])->name('reporte');
+    Route::get('/reporte/pdf', [ConstanciaController::class, 'exportarReportePDF'])->name('reporte.pdf');
+    Route::get('/', [ConstanciaController::class, 'index'])->name('root');
     Route::get('/index', [ConstanciaController::class, 'index'])->name('index');
     Route::get('/create', [ConstanciaController::class, 'create'])->name('create');
     Route::post('/', [ConstanciaController::class, 'store'])->name('store');
+    
     Route::get('/{id}/constancia-facilitador', [ConstanciaController::class, 'createFacilitador'])
         ->name('facilitador.create');
     Route::post('/constancia-facilitador/generar', [ConstanciaController::class, 'generateFacilitador'])
         ->name('facilitador.generate');
+    
+    Route::get('/{id}/constancia-docentes', [ConstanciaController::class, 'createDocentes'])
+        ->name('docentes.create');
+    Route::post('/constancia-docentes/generar', [ConstanciaController::class, 'generateDocentes'])
+        ->name('docentes.generate');
+    
     Route::get('/{constancia}/edit', [ConstanciaController::class, 'edit'])->name('edit');
     Route::put('/{constancia}', [ConstanciaController::class, 'update'])->name('update');
+    
     Route::get('/{constancia}', [ConstanciaController::class, 'show'])->name('show');
     Route::delete('/{constancia}', [ConstanciaController::class, 'destroy'])->name('destroy');
 });

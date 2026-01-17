@@ -9,6 +9,8 @@ class Constancia extends Model
     protected $table = 'capacitaciones';
     protected $fillable = [
         'tipo_curso',
+        'periodo',
+        'anio',
         'nombre',
         'instructor',
         'autoridad_educativa',

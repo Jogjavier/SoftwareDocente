@@ -6,6 +6,8 @@ export default function Create({ docentes = [] }) {
   const [docentesSeleccionados, setDocentesSeleccionados] = useState([]);
 
   const [tipoCurso, setTipoCurso] = useState("");
+  const [periodo, setPeriodo] = useState("");
+  const [anio, setAnio] = useState("");
   const [nombre, setNombre] = useState("");
   const [instructor, setInstructor] = useState("");
   const [autoridad_educativa, setAutoridadEducativa] = useState("");
@@ -22,6 +24,8 @@ export default function Create({ docentes = [] }) {
     e.preventDefault();
     Inertia.post("/capacitaciones", {
       tipo_curso: tipoCurso,
+      periodo,
+      anio,
       nombre,
       instructor,
       autoridad_educativa,
@@ -63,6 +67,40 @@ export default function Create({ docentes = [] }) {
               <option value="interno">Interno</option>
               <option value="externo">Externo</option>
             </select>
+          </div>
+
+          {/* Periodo */}
+          <div>
+              <label className="block font-semibold text-gray-700 mb-2">
+                  Semestre:
+              </label>
+              <select
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
+                  value={periodo}
+                  onChange={(e) => setPeriodo(e.target.value)}
+                  required
+              >
+                  <option value="">Seleccione el periodo</option>
+                  <option value="ENE-JUN">ENE - JUN</option>
+                  <option value="AGO-DIC">AGO - DIC</option>
+              </select>
+          </div>
+
+          {/* Año */}
+          <div>
+              <label className="block font-semibold text-gray-700 mb-2">
+                  Año:
+              </label>
+              <input
+                  type="number"
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
+                  value={anio}
+                  onChange={(e) => setAnio(e.target.value)}
+                  min="2000"
+                  max="2100"
+                  placeholder="2024"
+                  required
+              />
           </div>
 
           <div className="space-y-6">

@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Constancia</title>
-
     <style>
         @page {
             margin: 3cm 3cm;
@@ -16,14 +15,13 @@
             color: #000;
         }
 
-        /* FRANJA DERECHA COMPLETA */
         .franja {
             position: fixed;
-            top: -3cm;
-            bottom: -3cm;
+            top: 0;
+            bottom: 0;
             right: -3cm;
             width: 3cm;
-            z-index: -1;
+            z-index: 0;
         }
 
         .franja img {
@@ -32,13 +30,12 @@
             object-fit: cover;
         }
 
-        /* LOGO INFERIOR IZQUIERDO */
         .logo-bottom-left {
             position: fixed;
             left: -3cm;
             bottom: -3cm;
             width: 4cm;
-            z-index: -1;
+            z-index: 0;
         }
 
         .logo-bottom-left img {
@@ -46,21 +43,13 @@
             height: auto;
         }
 
-        /* LOGOS SUPERIORES */
         .header {
             margin-bottom: 40px;
         }
 
         .logos {
             width: 100%;
-            display: table;
-        }
-
-        .logo {
-            display: table-cell;
-            width: 33.33%;
             text-align: center;
-            vertical-align: middle;
         }
 
         .logo img {
@@ -68,8 +57,8 @@
         }
 
         .container {
-            width: 100%;
-            text-align: center;
+            position: relative;
+            z-index: 1;
         }
 
         .title {
@@ -110,53 +99,40 @@
 </head>
 <body>
 
-<!-- FRANJA -->
+@if($franjaBase64)
 <div class="franja">
-    <img src="{{ public_path('imagenes/franja_derecha.png') }}">
+    <img src="{{ $franjaBase64 }}">
 </div>
+@endif
 
-<!-- LOGO INFERIOR IZQUIERDO -->
+@if($itszoBase64)
 <div class="logo-bottom-left">
-    <img src="{{ public_path('logos/logo_inferior.png') }}">
+    <img src="{{ $itszoBase64 }}">
 </div>
+@endif
 
 <div class="container">
 
-    <!-- LOGOS SUPERIORES -->
     <div class="header">
         <div class="logos">
+            @if($todoenunoBase64)
             <div class="logo">
-                <img src="{{ public_path('logos/logo1.png') }}">
+                <img src="{{ $todoenunoBase64 }}" height="70">
             </div>
-            <div class="logo">
-                <img src="{{ public_path('logos/logo2.png') }}">
-            </div>
-            <div class="logo">
-                <img src="{{ public_path('logos/logo3.png') }}">
-            </div>
+            @endif
         </div>
     </div>
 
-    <!-- TITULO -->
-    <div class="title">
-        CONSTANCIA
-    </div>
+    <div class="title">CONSTANCIA</div>
+    <div class="subtitle">OTORGA LA PRESENTE:</div>
 
-    <div class="subtitle">
-        OTORGA LA PRESENTE:
-    </div>
-
-    <div class="recipient">
-        {{ strtoupper($nombre_completo) }}
-    </div>
+    <div class="recipient">{{ strtoupper($nombre_completo) }}</div>
 
     <div class="content">
         Por su participación como <strong>facilitador</strong> del curso de formación denominado
     </div>
 
-    <div class="course-name">
-        “{{ strtoupper($curso) }}”
-    </div>
+    <div class="course-name">"{{ strtoupper($curso) }}"</div>
 
     <div class="content">
         Impartido del <strong>{{ $fecha_inicio_formateada }}</strong>
@@ -170,7 +146,6 @@
     <div class="date-place">
         {{ $lugar }}, a {{ $fecha_expedicion }}
     </div>
-
 </div>
 
 </body>

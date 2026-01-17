@@ -69,7 +69,7 @@ export default function Show({ constancia }) {
                         </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => router.visit("/capacitaciones/constancias/docentes")}
+                                onClick={() => router.visit(`/capacitaciones/${constancia.id}/constancia-docentes`)}
                                 className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md"
                             >
                                 Generar Constancias de Docentes
@@ -117,17 +117,25 @@ export default function Show({ constancia }) {
                                 Periodo
                             </label>
                             <p className="text-lg text-gray-900">
-                                {constancia.fecha_inicio ? new Date(constancia.fecha_inicio).toLocaleDateString('es-MX', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric'
-                                }) : 'N/A'}
-                                {' → '}
-                                {constancia.fecha_fin ? new Date(constancia.fecha_fin).toLocaleDateString('es-MX', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric'
-                                }) : 'N/A'}
+                                {constancia.autoridad_educativa || 'No especificado'}
+                            </p>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-500 mb-1">
+                                Semestre 
+                            </label>
+                            <p className="text-lg text-gray-900">
+                                {constancia.periodo || 'No especificado'}
+                            </p>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-500 mb-1">
+                                Año
+                            </label>
+                            <p className="text-lg text-gray-900">
+                                {constancia.anio || 'No especificado'}
                             </p>
                         </div>
                     </div>

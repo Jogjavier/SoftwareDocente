@@ -12,9 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('capacitaciones', function (Blueprint $table) {
-            if (Schema::hasColumn('capacitaciones', 'docente_id')) {
-                $table->dropColumn('docente_id');
-            }
+            $table->integer('anio')->nullable()->after('periodo');
         });
     }
 

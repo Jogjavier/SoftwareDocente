@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { router } from '@inertiajs/react';
 
-export default function FacilitadorForm({ capacitacion, datos_default }) {
+export default function DocentesForm({ capacitacion, datos_default, docentes }) {
     const [formData, setFormData] = useState({
-        ...datos_default,
-        lugar: datos_default.lugar || 'Santiago Papasquiaro, Durango',
+        capacitacion_id: capacitacion.id,
+        curso: datos_default.curso || capacitacion.nombre,
+        horas: datos_default.horas || capacitacion.duracion_horas + ' horas',
+        fecha_inicio: datos_default.fecha_inicio || capacitacion.fecha_inicio,
+        fecha_fin: datos_default.fecha_fin || capacitacion.fecha_fin,
+        lugar: datos_default.lugar || 'Sombrerete, Zacatecas',
         nombre_director: datos_default.nombre_director || '',
-        puesto_director: datos_default.puesto_director || 'Director de Capacitación'
+        puesto_director: datos_default.puesto_director || 'DIRECTORA GENERAL',
     });
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -22,29 +25,24 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
 
         try {
             console.log('Enviando datos:', formData);
             
-            const response = await fetch('/capacitaciones/constancia-facilitador/generar', {
+            const response = await fetch('/capacitaciones/constancia-docentes/generar', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
+                    'Accept': 'application/zip',
                 },
                 body: JSON.stringify(formData),
             });
 
             console.log('Status de respuesta:', response.status);
-            console.log('Headers:', response.headers);
 
             if (response.ok) {
-                const contentType = response.headers.get('content-type');
-                console.log('Content-Type:', contentType);
-                
-                // Obtener el blob del documento
+                // Obtener el blob del ZIP
                 const blob = await response.blob();
                 console.log('Blob recibido:', blob.size, 'bytes');
                 
@@ -54,7 +52,7 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
                 // Crear link de descarga
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `constancia-facilitador-${formData.nombre_completo.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.docx`;
+                link.download = `constancias-docentes-capacitacion-${formData.capacitacion_id}-${new Date().toISOString().split('T')[0]}.zip`;
                 
                 // Simular click
                 document.body.appendChild(link);
@@ -65,7 +63,7 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
                 window.URL.revokeObjectURL(url);
                 
                 // Mostrar mensaje de éxito
-                alert('¡Constancia generada exitosamente!');
+                alert(`¡Constancias generadas exitosamente! Se generaron ${docentes?.length || 0} constancias en el archivo ZIP.`);
                 
                 // Opcional: Redirigir después de 2 segundos
                 setTimeout(() => {
@@ -91,12 +89,10 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
                     errorMessage = errorText;
                 }
                 
-                setError(errorMessage);
-                alert('Error al generar la constancia:\n' + errorMessage);
+                alert('Error al generar las constancias:\n' + errorMessage);
             }
         } catch (error) {
             console.error('Error catch:', error);
-            setError(error.message);
             alert('Error de conexión: ' + error.message);
         } finally {
             setLoading(false);
@@ -111,35 +107,16 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
                     <div className="mb-8">
                         <div className="flex items-center justify-between mb-4">
                             <h1 className="text-3xl font-bold text-gray-800">
-                                Generar Constancia de Facilitador
+                                Generar Constancias de Docentes
                             </h1>
                             <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg text-sm font-semibold">
                                 ID: {capacitacion.id}
                             </span>
                         </div>
                         <p className="text-gray-600">
-                            Revise y edite los datos antes de generar la constancia en DOCX
+                            Se generarán constancias para <strong>{docentes?.length || 0} docente(s)</strong> en un archivo ZIP
                         </p>
                     </div>
-
-                    {/* Mensaje de Error */}
-                    {error && (
-                        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-                            <div className="flex">
-                                <div className="flex-shrink-0">
-                                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div className="ml-3">
-                                    <h3 className="text-sm font-medium text-red-800">Error al generar la constancia</h3>
-                                    <div className="mt-2 text-sm text-red-700 whitespace-pre-wrap">
-                                        {error}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     {/* Info de la Capacitación Original */}
                     <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
@@ -166,29 +143,51 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
                         </div>
                     </div>
 
+                    {/* Lista de Docentes */}
+                    {docentes && docentes.length > 0 && (
+                        <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+                            <h3 className="font-semibold text-green-900 mb-3">
+                                👥 Docentes que recibirán constancia
+                            </h3>
+                            <div className="max-h-48 overflow-y-auto">
+                                <ul className="space-y-2 text-sm">
+                                    {docentes.map((docente, index) => (
+                                        <li key={docente.id || index} className="flex items-center text-gray-700">
+                                            <span className="inline-block w-6 h-6 rounded-full bg-green-200 text-green-800 text-xs flex items-center justify-center mr-2">
+                                                {index + 1}
+                                            </span>
+                                            <span>
+                                                {docente.nombres} {docente.apellido_paterno} {docente.apellido_materno}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+
+                    {docentes && docentes.length === 0 && (
+                        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6">
+                            <div className="flex">
+                                <div className="flex-shrink-0">
+                                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div className="ml-3">
+                                    <h3 className="text-sm font-medium text-yellow-800">
+                                        No hay docentes registrados
+                                    </h3>
+                                    <p className="text-sm text-yellow-700 mt-1">
+                                        Debe registrar al menos un docente para generar constancias.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Formulario */}
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <input type="hidden" name="capacitacion_id" value={formData.capacitacion_id} />
-
-                        {/* Nombre Completo del Facilitador */}
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Nombre Completo del Facilitador *
-                            </label>
-                            <input
-                                type="text"
-                                name="nombre_completo"
-                                value={formData.nombre_completo}
-                                onChange={handleChange}
-                                required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                                placeholder="Ej: Juan Pérez García"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Tomado del campo "Instructor" de la capacitación
-                            </p>
-                        </div>
-
                         {/* Curso */}
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -219,9 +218,6 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                 placeholder="Ej: 40 horas"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Original: {capacitacion.duracion_horas} horas
-                            </p>
                         </div>
 
                         {/* Fechas */}
@@ -324,7 +320,7 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
                             
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={loading || (docentes && docentes.length === 0)}
                                 className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                             >
                                 {loading ? (
@@ -333,14 +329,14 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        Generando DOCX...
+                                        Generando ZIP...
                                     </>
                                 ) : (
                                     <>
                                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
-                                        Generar Constancia
+                                        Generar Constancias ({docentes?.length || 0})
                                     </>
                                 )}
                             </button>

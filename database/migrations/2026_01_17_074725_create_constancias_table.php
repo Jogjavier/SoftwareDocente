@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('capacitaciones', function (Blueprint $table) {
-            if (Schema::hasColumn('capacitaciones', 'docente_id')) {
-                $table->dropColumn('docente_id');
-            }
+        Schema::create('constancias', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
         });
     }
 
@@ -23,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('capacitaciones', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('constancias');
     }
 };
