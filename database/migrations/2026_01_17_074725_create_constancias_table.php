@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('constancias', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('capacitacion_id')
+                ->constrained('capacitaciones')
+                ->cascadeOnDelete();
+
+            $table->string('folio')->unique();
+            $table->uuid('hash')->unique();
+
+            $table->string('nombre_beneficiario');
+            $table->enum('tipo', ['facilitador', 'docente']);
+
+            $table->timestamp('fecha_emision');
             $table->timestamps();
         });
     }

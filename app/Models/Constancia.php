@@ -32,6 +32,10 @@ class Constancia extends Model
             'capacitacion_id',
             'docente_id'
         );
+    }
 
+    public function constanciasEmitidas()
+    {
+        return $this->hasMany(Constancias::class, 'capacitacion_id');
     }
 }

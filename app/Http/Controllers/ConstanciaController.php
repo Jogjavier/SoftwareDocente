@@ -6,12 +6,14 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Constancia;
 use App\Models\Docente;
+use App\Models\Constancias;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ConstanciaController extends Controller
 {
@@ -351,6 +353,17 @@ class ConstanciaController extends Controller
                 'nombre_director' => 'required|string',
                 'puesto_director' => 'required|string',
             ]);
+            
+            $hash = Str::uuid()->toString();
+
+            $constanciaEmitida = Constancias::create([
+                'capacitacion_id'     => $validated['capacitacion_id'],
+                'folio'               => strtoupper(Str::random(10)),
+                'tipo'                => 'facilitador', // o docente
+                'nombre_beneficiario' => $validated['nombre_completo'] ?? $nombreCompleto,
+                'fecha_emision'       => now(),
+                'hash'                => $hash,
+            ]);
 
             $phpWord = new \PhpOffice\PhpWord\PhpWord();
 
@@ -647,6 +660,26 @@ class ConstanciaController extends Controller
 
             \Log::info("Generando constancia para: {$nombreCompleto}");
 
+            $hash = (string) Str::uuid();
+
+            $constancia = Constancias::create([
+                'capacitacion_id'     => $capacitacion->id,
+                'folio'               => $capacitacion->folio_fechaemision . '-' . strtoupper(Str::random(5)),
+                'hash'                => $hash,
+                'tipo'                => 'docente',
+                'nombre_beneficiario' => $nombreCompleto,
+                'fecha_emision'       => now(),
+            ]);
+
+            // 🔳 Generar QR
+            $url = route('capacitaciones.constancias.validar', $hash);
+            $qrPath = storage_path("app/qr-{$hash}.png");
+
+            QrCode::format('png')
+                ->size(200)
+                ->useGD()
+                ->generate($url, $qrPath);
+
             $phpWord = new \PhpOffice\PhpWord\PhpWord();
 
             // Configuración de la sección solo con margen y borde superior
@@ -864,6 +897,8 @@ class ConstanciaController extends Controller
             } else {
                 \Log::error("No se pudo encontrar el archivo temporal: {$tempPath}");
             }
+
+            @unlink($qrPath);
         }
 
         $zip->close();
@@ -907,5 +942,26 @@ class ConstanciaController extends Controller
         ], 500);
     }
 }
+
+
+    public function validar($hash)
+    {
+        $constancia = Constancias::with('capacitacion')
+            ->where('hash', $hash)
+            ->first();
+
+        return view('constancias.validar', compact('constancia'));
+    }
+
+    public function buscar(Request $request)
+    {
+        $resultados = Constancias::with('capacitacion')
+            ->whereHas('capacitacion', function ($q) use ($request) {
+                $q->where('nombre', 'LIKE', "%{$request->curso}%");
+            })
+            ->get();
+
+        return view('constancias.resultados', compact('resultados'));
+    }
 
 }
