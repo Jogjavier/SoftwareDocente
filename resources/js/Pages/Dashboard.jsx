@@ -99,7 +99,7 @@ export default function Dashboard() {
 
   return (
     <AuthenticatedLayout>
-      <Head title="Dashboard" />
+      <Head title="Software Docente" />
 
       <div className="py-12">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">

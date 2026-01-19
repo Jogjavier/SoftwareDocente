@@ -95,16 +95,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // RUTAS SOLO PARA ADMINISTRADORES
     // ========================================
     
-    Route::middleware(['role:admin'])->group(function () {
+    Route::middleware(['admin'])->group(function () {
         // Usuarios - CRUD completo
         Route::prefix('usuarios')->name('usuarios.')->group(function () {
-        Route::get('/index', [UsuarioController::class, 'index'])->name('index');
-        Route::get('/create', [UsuarioController::class, 'create'])->name('create');
-        Route::post('/', [UsuarioController::class, 'store'])->name('store');
-        Route::get('/{usuario}/edit', [UsuarioController::class, 'edit'])->name('edit');
-        Route::put('/{usuario}', [UsuarioController::class, 'update'])->name('update');
-        Route::delete('/{usuario}', [UsuarioController::class, 'destroy'])->name('destroy');
-    });
+            Route::get('/index', [UserController::class, 'index'])->name('index');
+            Route::get('/create', [UserController::class, 'create'])->name('create');
+            Route::post('/', [UserController::class, 'store'])->name('store');
+            Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+            Route::put('/{user}', [UserController::class, 'update'])->name('update');
+            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+            Route::get('/{user}', [UserController::class, 'show'])->name('show');
+        });
+
         // Carreras - CRUD completo
         Route::prefix('catalogo/carreras')->name('catalogo.carreras.')->group(function () {
             Route::get('/create', [CarreraController::class, 'create'])->name('create');
