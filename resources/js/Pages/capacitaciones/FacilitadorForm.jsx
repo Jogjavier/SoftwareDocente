@@ -3,6 +3,7 @@ import { router } from '@inertiajs/react';
 
 export default function FacilitadorForm({ capacitacion, datos_default }) {
     const [formData, setFormData] = useState({
+        capacitacion_id: capacitacion.id,
         ...datos_default,
         lugar: datos_default.lugar || 'Santiago Papasquiaro, Durango',
         nombre_director: datos_default.nombre_director || '',
@@ -25,79 +26,46 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
         setError(null);
 
         try {
-            console.log('Enviando datos:', formData);
-            
-            const response = await fetch('/capacitaciones/constancia-facilitador/generar', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            console.log('Status de respuesta:', response.status);
-            console.log('Headers:', response.headers);
-
-            if (response.ok) {
-                const contentType = response.headers.get('content-type');
-                console.log('Content-Type:', contentType);
-                
-                // Obtener el blob del documento
-                const blob = await response.blob();
-                console.log('Blob recibido:', blob.size, 'bytes');
-                
-                // Crear URL temporal
-                const url = window.URL.createObjectURL(blob);
-                
-                // Crear link de descarga
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `constancia-facilitador-${formData.nombre_completo.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.docx`;
-                
-                // Simular click
-                document.body.appendChild(link);
-                link.click();
-                
-                // Limpiar
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-                
-                // Mostrar mensaje de éxito
-                alert('¡Constancia generada exitosamente!');
-                
-                // Opcional: Redirigir después de 2 segundos
-                setTimeout(() => {
-                    router.visit('/capacitaciones');
-                }, 2000);
-            } else {
-                // Intentar leer el error como JSON
-                const contentType = response.headers.get('content-type');
-                let errorMessage = 'Error desconocido';
-                
-                if (contentType && contentType.includes('application/json')) {
-                    const errorData = await response.json();
-                    console.error('Error JSON:', errorData);
-                    errorMessage = errorData.message || JSON.stringify(errorData);
-                    
-                    // Si hay errores de validación
-                    if (errorData.errors) {
-                        errorMessage = Object.values(errorData.errors).flat().join('\n');
-                    }
-                } else {
-                    const errorText = await response.text();
-                    console.error('Error Text:', errorText);
-                    errorMessage = errorText;
+            const response = await fetch(
+                route('capacitaciones.facilitador.generate'),
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document
+                            .querySelector('meta[name="csrf-token"]')
+                            .content,
+                    },
+                    body: JSON.stringify(formData),
                 }
-                
-                setError(errorMessage);
-                alert('Error al generar la constancia:\n' + errorMessage);
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                    errorData.message ||
+                    Object.values(errorData.errors || {}).flat().join('\n')
+                );
             }
-        } catch (error) {
-            console.error('Error catch:', error);
-            setError(error.message);
-            alert('Error de conexión: ' + error.message);
+
+            const blob = await response.blob();
+
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `constancia-facilitador-${formData.nombre_completo.replace(/\s+/g, '-')}.docx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            setTimeout(() => {
+                router.visit('/capacitaciones');
+            }, 1500);
+
+        } catch (err) {
+            setError(err.message);
+            alert('Error: ' + err.message);
         } finally {
             setLoading(false);
         }
@@ -168,7 +136,6 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
 
                     {/* Formulario */}
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <input type="hidden" name="capacitacion_id" value={formData.capacitacion_id} />
 
                         {/* Nombre Completo del Facilitador */}
                         <div>

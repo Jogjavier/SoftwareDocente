@@ -67,12 +67,6 @@ export default function Create({ docente }) {
       {/* Header */}
       <div className="bg-red-800 rounded-xl p-6 mb-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Agregar Experiencia Docente</h1>
-        <Link
-          href={`/docentes/${docente.id}`}
-          className="bg-yellow-400 text-red-800 px-4 py-2 rounded font-semibold hover:bg-yellow-300"
-        >
-          Regresar
-        </Link>
       </div>
 
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-8 border border-gray-200">

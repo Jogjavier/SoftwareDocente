@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { router } from "@inertiajs/react";
 
-export default function Create({ carreras}) {
+export default function Create({ carreras }) {
   // Docente data
   const [nombres, setNombres] = useState("");
   const [apellido_paterno, setApellidoPaterno] = useState("");
@@ -86,13 +86,16 @@ export default function Create({ carreras}) {
       }
     });
 
-    Inertia.post("/docentes", formData, {
+    // ✅ CORREGIDO: Usar router en lugar de Inertia
+    router.post(route('docentes.store'), formData, {
       forceFormData: true,
+      onSuccess: () => {
+        console.log('Docente creado exitosamente');
+      },
+      onError: (errors) => {
+        console.error('Errores de validación:', errors);
+      }
     });
-  };
-
-  const goToExperiencia = () => {
-    window.location.href = route('docentes.experiencias.create', docente.id);
   };
 
   return (
@@ -102,7 +105,8 @@ export default function Create({ carreras}) {
       </div>
 
       <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-        <div onSubmit={handleSubmit} className="space-y-8">
+        {/* ✅ CORREGIDO: Usar <form> en lugar de <div> */}
+        <form onSubmit={handleSubmit} className="space-y-8">
           
           {/* Información Personal */}
           <div className="border-b pb-6">
@@ -224,6 +228,7 @@ export default function Create({ carreras}) {
                   <option value="Alto">Alto</option>
                 </select>
               </div>
+
               <div className="mb-4">
                 <label className="block text-gray-700 font-semibold mb-2">
                   Año de ingreso:
@@ -240,24 +245,24 @@ export default function Create({ carreras}) {
                 />
               </div>
 
-            <div className="mb-4">
-              <label className="block text-gray-700 font-semibold mb-2">
-                Departamento al que pertenece:
-              </label>
-              <select
-                value={carrera_id}
-                onChange={(e) => setCarreraId(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
-                required
-              >
-                <option value="">Seleccione una carrera</option>
-                {carreras.map((carrera) => (
-                  <option key={carrera.id} value={carrera.id}>
-                    {carrera.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Departamento al que pertenece:
+                </label>
+                <select
+                  value={carrera_id}
+                  onChange={(e) => setCarreraId(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-red-500"
+                  required
+                >
+                  <option value="">Seleccione una carrera</option>
+                  {carreras.map((carrera) => (
+                    <option key={carrera.id} value={carrera.id}>
+                      {carrera.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
@@ -267,21 +272,21 @@ export default function Create({ carreras}) {
             <div className="flex gap-2 mb-6">
               <button
                 type="button"
-                onClick={(e) => { e.preventDefault(); addNivel("Licenciatura"); }}
+                onClick={() => addNivel("Licenciatura")}
                 className="bg-red-800 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
               >
                 Agregar Licenciatura
               </button>
               <button
                 type="button"
-                onClick={(e) => { e.preventDefault(); addNivel("Maestría"); }}
+                onClick={() => addNivel("Maestría")}
                 className="bg-red-800 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
               >
                 Agregar Maestría
               </button>
               <button
                 type="button"
-                onClick={(e) => { e.preventDefault(); addNivel("Doctorado"); }}
+                onClick={() => addNivel("Doctorado")}
                 className="bg-red-800 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
               >
                 Agregar Doctorado
@@ -320,7 +325,6 @@ export default function Create({ carreras}) {
                         <label className="block mb-2 text-gray-700 font-medium">
                           {`Nombre de la ${nivel.nivel}:`}
                         </label>
-
                         <input
                           type="text"
                           value={nivel.nombre}
@@ -329,7 +333,6 @@ export default function Create({ carreras}) {
                           placeholder={`Nombre de la ${nivel.nivel}`}
                         />
                       </div>
-
 
                       <div>
                         <label className="block mb-2 text-gray-700 font-medium">Escuela de procedencia:</label>
@@ -393,10 +396,11 @@ export default function Create({ carreras}) {
             )}
           </div>
 
-          {/* Botón Guardar */}
+          {/* Botones */}
           <div className="flex gap-4">
+            {/* ✅ CORREGIDO: type="submit" en lugar de onClick */}
             <button
-              onClick={handleSubmit}
+              type="submit"
               className="flex-1 bg-red-800 text-white hover:bg-red-700 hover:text-yellow-300 px-6 py-3 rounded-lg font-semibold transition"
             >
               Guardar Docente
@@ -409,7 +413,7 @@ export default function Create({ carreras}) {
               Cancelar
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

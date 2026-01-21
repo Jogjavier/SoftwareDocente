@@ -30,7 +30,7 @@ export default function Index({ docentes = [], filters = {} }) {
             className="h-20 w-37 object-cover rounded"
           />
           <img 
-            src="/storage/ITSZO.webp" 
+            src="/storage/ITSZO.png" 
             alt="Logo 2" 
             className="h-20 w-37 object-cover rounded"
           />

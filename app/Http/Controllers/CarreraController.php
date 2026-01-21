@@ -45,7 +45,7 @@ class CarreraController extends Controller
         'siglas' => $request->siglas,
         ]);
 
-     return redirect()->route('carreras.index');
+     return redirect()->route('catalogo.carreras.index');
     }
 
     public function edit(Carrera $carrera)
@@ -67,7 +67,7 @@ class CarreraController extends Controller
             'siglas' => $request->siglas,
         ]);
 
-        return redirect()->route('carreras.index');
+        return redirect()->route('catalogo.carreras.index');
     }
 
     public function destroy(Carrera $carrera)

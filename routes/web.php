@@ -14,6 +14,14 @@ use App\Http\Controllers\ActivarDocenteController;
 use App\Http\Controllers\EvaluacionDepartamentalController;
 use App\Http\Controllers\UserController;
 
+// Dashboard
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('login');
+})->name('home');
+
 // Ruta pública para validar constancias (sin autenticación)
 Route::get('/validar-constancia/{hash}', [ConstanciaController::class, 'validar'])
     ->name('constancias.validar');
@@ -23,11 +31,7 @@ Route::get('/buscar-constancia', [ConstanciaController::class, 'buscar'])
 
 // Rutas que requieren autenticación
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Dashboard
-    Route::get('/', function () {
-        return Inertia::render('Dashboard');
-    })->name('home');
-
+    
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
@@ -48,12 +52,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/index', [CarreraController::class, 'index'])->name('index');
     });
 
-    // Docentes - Solo lectura
-    Route::prefix('docentes')->name('docentes.')->group(function () {
-        Route::get('/index', [DocenteController::class, 'index'])->name('index');
-        Route::get('/{docente}', [DocenteController::class, 'show'])->name('show');
-        Route::get('/reporte-pdf', [DocenteController::class, 'generarReportePDF'])->name('reporte.pdf');
-    });
+    // Docentes - Solo lectura (disponible para todos los autenticados)
+    Route::get('/docentes/reporte-pdf', [DocenteController::class, 'generarReportePDF'])->name('docentes.reporte.pdf');
+    Route::get('/docentes/index', [DocenteController::class, 'index'])->name('docentes.index');
+    Route::get('/docentes/{docente}', [DocenteController::class, 'show'])->name('docentes.show');
 
     // Evaluación Docente - Solo lectura
     Route::prefix('evaluaciones/evaluaciondocente')->name('evaluaciones.evaluaciondocente.')->group(function () {
@@ -95,18 +97,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // RUTAS SOLO PARA ADMINISTRADORES
     // ========================================
     
-    Route::middleware(['admin'])->group(function () {
-        // Usuarios - CRUD completo
-        Route::prefix('usuarios')->name('usuarios.')->group(function () {
-            Route::get('/index', [UserController::class, 'index'])->name('index');
-            Route::get('/create', [UserController::class, 'create'])->name('create');
-            Route::post('/', [UserController::class, 'store'])->name('store');
-            Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
-            Route::put('/{user}', [UserController::class, 'update'])->name('update');
-            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
-            Route::get('/{user}', [UserController::class, 'show'])->name('show');
-        });
-
+    Route::middleware(['role:admin'])->group(function () {
+        
         // Carreras - CRUD completo
         Route::prefix('catalogo/carreras')->name('catalogo.carreras.')->group(function () {
             Route::get('/create', [CarreraController::class, 'create'])->name('create');
@@ -116,14 +108,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/{carrera}', [CarreraController::class, 'destroy'])->name('destroy');
         });
 
-        // Docentes - CRUD completo
-        Route::prefix('docentes')->name('docentes.')->group(function () {
-            Route::get('/create', [DocenteController::class, 'create'])->name('create');
-            Route::post('/', [DocenteController::class, 'store'])->name('store');
-            Route::get('/{docente}/edit', [DocenteController::class, 'edit'])->name('edit');
-            Route::put('/{docente}', [DocenteController::class, 'update'])->name('update');
-            Route::delete('/{docente}', [DocenteController::class, 'destroy'])->name('destroy');
-        });
+        // Docentes - CRUD completo (solo admin)
+        Route::get('/docentes/create', [DocenteController::class, 'create'])->name('docentes.create');
+        Route::post('/docentes', [DocenteController::class, 'store'])->name('docentes.store');
+        Route::get('/docentes/{docente}/edit', [DocenteController::class, 'edit'])->name('docentes.edit');
+        Route::put('/docentes/{docente}', [DocenteController::class, 'update'])->name('docentes.update');
+        Route::delete('/docentes/{docente}', [DocenteController::class, 'destroy'])->name('docentes.destroy');
+        Route::get('/docentes/{docente}', [DocenteController::class, 'show'])->whereNumber('docente')->name('docentes.show');
 
         // Niveles de estudio y experiencias
         Route::resource('docentes.niveles', NivelEstudioController::class)->shallow();
@@ -143,7 +134,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/create', [EvaluacionDepartamentalController::class, 'create'])->name('create');
             Route::post('/', [EvaluacionDepartamentalController::class, 'store'])->name('store');
             Route::get('/{evaluaciondepartamental}/edit', [EvaluacionDepartamentalController::class, 'edit'])->name('edit');
-            Route::put('/{evaluaciondepartamental}', [EvaluacionDepartamentalController::class, 'update'])->name('update');
+            Route::put('/{evaluaciondepartamental}', [EvaluacionDepartamentalController::class, ' update'])->name('update');
             Route::delete('/{evaluaciondepartamental}', [EvaluacionDepartamentalController::class, 'destroy'])->name('destroy');
         });
 
@@ -155,11 +146,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('/{constancia}', [ConstanciaController::class, 'update'])->name('update');
             Route::delete('/{constancia}', [ConstanciaController::class, 'destroy'])->name('destroy');
             
-            // Generación de constancias
+            // SOLO las rutas GET para mostrar los formularios
             Route::get('/{id}/constancia-facilitador', [ConstanciaController::class, 'createFacilitador'])->name('facilitador.create');
-            Route::post('/constancia-facilitador/generar', [ConstanciaController::class, 'generateFacilitador'])->name('facilitador.generate');
             Route::get('/{id}/constancia-docentes', [ConstanciaController::class, 'createDocentes'])->name('docentes.create');
-            Route::post('/constancia-docentes/generar', [ConstanciaController::class, 'generateDocentes'])->name('docentes.generate');
+            
+            // ⚠️ RUTAS POST MOVIDAS AQUÍ DENTRO DEL GRUPO ADMIN
+            Route::post('/constancia-facilitador/generar', [ConstanciaController::class, 'generateFacilitador'])
+                ->withoutMiddleware([\App\Http\Middleware\HandleInertiaRequests::class])
+                ->name('facilitador.generate');
+            
+            Route::post('/constancia-docentes/generar', [ConstanciaController::class, 'generateDocentes'])
+                ->withoutMiddleware([\App\Http\Middleware\HandleInertiaRequests::class])
+                ->name('docentes.generate');
         });
 
         // Activar Docente - CRUD completo
@@ -169,6 +167,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/{activardocente}/edit', [ActivarDocenteController::class, 'edit'])->name('edit');
             Route::put('/{activardocente}', [ActivarDocenteController::class, 'update'])->name('update');
             Route::delete('/{activardocente}', [ActivarDocenteController::class, 'destroy'])->name('destroy');
+        });
+
+        // Usuarios - CRUD completo
+        Route::prefix('usuarios')->name('usuarios.')->group(function () {
+            Route::get('/index', [UserController::class, 'index'])->name('index');
+            Route::get('/create', [UserController::class, 'create'])->name('create');
+            Route::post('/', [UserController::class, 'store'])->name('store');
+            Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+            Route::put('/{user}', [UserController::class, 'update'])->name('update');
+            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+            Route::get('/{user}', [UserController::class, 'show'])->name('show');
         });
     });
 });

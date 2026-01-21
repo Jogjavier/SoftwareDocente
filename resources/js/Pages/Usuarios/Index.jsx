@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
+import { FaArrowLeft } from 'react-icons/fa';
 import { 
   FaUserPlus, 
   FaEdit, 
@@ -44,10 +45,10 @@ export default function Index({ users, flash }) {
             Gestión de Usuarios
           </h2>
           <Link
-            href={route('usuarios.create')}
-            className="flex items-center gap-2 px-4 py-2 bg-red-800 text-white rounded-lg hover:bg-red-900 transition-colors"
+            href={route('dashboard')}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
           >
-            <FaUserPlus /> Nuevo Usuario
+            <FaArrowLeft /> Volver
           </Link>
         </div>
       }

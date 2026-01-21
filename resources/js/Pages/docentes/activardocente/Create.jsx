@@ -54,35 +54,35 @@ export default function Create({ docentes, carreras }) {
           </div>
 
           {/* Docente */}
-<div>
-  <label className="block font-semibold text-gray-700 mb-1">
-    Docente
-  </label>
-  <select
-    className="w-full border rounded-lg px-4 py-2 focus:ring focus:ring-red-200"
-    value={data.docente_id}
-    onChange={(e) => setData("docente_id", e.target.value)}
-    disabled={!data.carrera_id}
-  >
-    <option value="">
-      {data.carrera_id
-        ? "Seleccione un docente"
-        : "Seleccione primero una carrera"}
-    </option>
+          <div>
+            <label className="block font-semibold text-gray-700 mb-1">
+              Docente
+            </label>
+            <select
+              className="w-full border rounded-lg px-4 py-2 focus:ring focus:ring-red-200"
+              value={data.docente_id}
+              onChange={(e) => setData("docente_id", e.target.value)}
+              disabled={!data.carrera_id}
+            >
+              <option value="">
+                {data.carrera_id
+                  ? "Seleccione un docente"
+                  : "Seleccione primero una carrera"}
+              </option>
 
-    {docentesFiltrados.map((docente) => (
-      <option key={docente.id} value={docente.id}>
-        {docente.nombres} {docente.apellido_paterno} {docente.apellido_materno}
-      </option>
-    ))}
-  </select>
+              {docentesFiltrados.map((docente) => (
+                <option key={docente.id} value={docente.id}>
+                  {docente.nombres} {docente.apellido_paterno} {docente.apellido_materno}
+                </option>
+              ))}
+            </select>
 
-  {errors.docente_id && (
-    <p className="text-red-600 text-sm mt-1">
-      {errors.docente_id}
-    </p>
-  )}
-</div>
+            {errors.docente_id && (
+              <p className="text-red-600 text-sm mt-1">
+                {errors.docente_id}
+              </p>
+            )}
+          </div>
 
           {/* Semestre */}
           <div>

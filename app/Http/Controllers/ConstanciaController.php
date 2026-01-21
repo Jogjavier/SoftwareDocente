@@ -13,7 +13,8 @@ use PhpOffice\PhpWord\SimpleType\Jc;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\PngWriter;
 
 class ConstanciaController extends Controller
 {
@@ -339,248 +340,322 @@ class ConstanciaController extends Controller
         ]);
     }
 
-   public function generateFacilitador(Request $request)
-    {
-       try {
-            $validated = $request->validate([
-                'capacitacion_id' => 'required|exists:capacitaciones,id',
-                'nombre_completo' => 'required|string',
-                'curso'           => 'required|string',
-                'horas'           => 'required|string',
-                'fecha_inicio'    => 'required|date',
-                'fecha_fin'       => 'required|date',
-                'lugar'           => 'required|string',
-                'nombre_director' => 'required|string',
-                'puesto_director' => 'required|string',
-            ]);
-            
-            $hash = Str::uuid()->toString();
+    public function generateFacilitador(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'capacitacion_id' => 'required|exists:capacitaciones,id',
+            'nombre_completo' => 'required|string',
+            'curso'           => 'required|string',
+            'horas'           => 'required|string',
+            'fecha_inicio'    => 'required|date',
+            'fecha_fin'       => 'required|date',
+            'lugar'           => 'required|string',
+            'nombre_director' => 'required|string',
+            'puesto_director' => 'required|string',
+        ]);
 
-            $constanciaEmitida = Constancias::create([
-                'capacitacion_id'     => $validated['capacitacion_id'],
-                'folio'               => strtoupper(Str::random(10)),
-                'tipo'                => 'facilitador', // o docente
-                'nombre_beneficiario' => $validated['nombre_completo'] ?? $nombreCompleto,
-                'fecha_emision'       => now(),
-                'hash'                => $hash,
-            ]);
+        \Log::info('Generando constancia para facilitador: ' . $validated['nombre_completo']);
 
-            $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        // Obtener la capacitación para el folio
+        $capacitacion = Constancia::findOrFail($validated['capacitacion_id']);
+        
+        // Generar hash único para validación
+        $hash = (string) Str::uuid();
 
-            // Configuración de la sección solo con margen y borde superior
-            $section = $phpWord->addSection([
-                'marginTop'        => 850,
-                'marginBottom'     => 850,
-                'marginLeft'       => 0,
-                'marginRight'      => 0,
-                // Solo borde superior
-                'borderTopColor'   => 'FFFFFF',
-                'borderTopSize'    => 12,
-            ]);
+        // Crear registro de constancia emitida
+        $constanciaEmitida = Constancias::create([
+            'capacitacion_id'     => $validated['capacitacion_id'],
+            'folio'               => $capacitacion->folio_fechaemision . '-' . strtoupper(Str::random(5)),
+            'tipo'                => 'facilitador',
+            'nombre_beneficiario' => $validated['nombre_completo'],
+            'fecha_emision'       => now(),
+            'hash'                => $hash,
+        ]);
 
-            /*
-            |---------------------------------------------------------
-            | FRANJA LATERAL DERECHA (FUERA DEL MARCO)
-            |---------------------------------------------------------
-            */
-            $franjaPath = public_path('storage/franja.png');
-            if (file_exists($franjaPath)) {
-                $section->addImage($franjaPath, [
-                    'width'            => 90,
-                    'height'           => 842,
-                    'positioning'      => 'absolute',
-                    'posHorizontal'    => 'absolute',
-                    'posVertical'      => 'absolute',
-                    'left'             => 545,
-                    'top'              => 0,
-                    'posHorizontalRel' => 'page',
-                    'posVerticalRel'   => 'page',
-                    'wrappingStyle'    => 'behind',
-                ]);
-            }
+        \Log::info('Constancia registrada con folio: ' . $constanciaEmitida->folio);
 
-            /*
-            |---------------------------------------------------------
-            | LOGOS SUPERIORES (UNO AL LADO DEL OTRO)
-            |---------------------------------------------------------
-            */
-            $section->addTextBreak(1);
-            
-            // TextRun alineado a la izquierda para los logos
-            $logosRun = $section->addTextRun(['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, 'indentation' => ['left' => 200]]);
-            
-            // Logo Educación
+        // Generar código QR
+        $url = route('constancias.validar', $hash);
+        $qrPath = storage_path("app/qr-{$hash}.png");
+
+        $result = Builder::create()
+            ->writer(new PngWriter())
+            ->data($url)
+            ->size(300)
+            ->margin(10)
+            ->build();
+
+        $result->saveToFile($qrPath);
+
+        \Log::info('QR generado en: ' . $qrPath);
+
+        $phpWord = new \PhpOffice\PhpWord\PhpWord();
+ 
+
+        // Configuración de la sección
+        $section = $phpWord->addSection([
+            'marginTop'        => 850,
+            'marginBottom'     => 850,
+            'marginLeft'       => 0,
+            'marginRight'      => 0,
+            'borderTopColor'   => 'FFFFFF',
+            'borderTopSize'    => 12,
+        ]);
+
+        /*
+        |---------------------------------------------------------
+        | LOGOS SUPERIORES (UNO AL LADO DEL OTRO)
+        |---------------------------------------------------------
+        */
+        $section->addTextBreak(1);
+        
+        // TextRun alineado a la izquierda para los logos
+        $logosRun = $section->addTextRun([
+            'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, 
+            'indentation' => ['left' => 200]
+        ]);
+        
+        // Logo Educación
+        if (file_exists(public_path('storage/educacion.png'))) {
             $logosRun->addImage(public_path('storage/educacion.png'), [
                 'width'  => 200,
                 'height' => 60,
             ]);
-            
-            // Logo TecNM
+        }
+        
+        // Logo TecNM
+        if (file_exists(public_path('storage/tecnm.png'))) {
             $logosRun->addImage(public_path('storage/tecnm.png'), [
                 'width'  => 160,
                 'height' => 60,
             ]);
-            
-            // Logo Secretaría
+        }
+        
+        // Logo Secretaría
+        if (file_exists(public_path('storage/secretaria.png'))) {
             $logosRun->addImage(public_path('storage/secretaria.png'), [
                 'width'  => 160,
                 'height' => 60,
             ]);
+        }
 
-            /*
-            |---------------------------------------------------------
-            | CUERPO DEL DOCUMENTO (CENTRADO)
-            |---------------------------------------------------------
-            */
-            
-            $section->addTextBreak(2);
-            
-            // Encabezado principal
-            $section->addText(
-                'EL TECNOLÓGICO NACIONAL DE MÉXICO',
-                ['size' => 14, 'bold' => true, 'color' => '969696'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
-            );
+        /*
+        |---------------------------------------------------------
+        | CUERPO DEL DOCUMENTO (CENTRADO)
+        |---------------------------------------------------------
+        */
+        
+        $section->addTextBreak(2);
+        
+        // Encabezado principal
+        $section->addText(
+            'EL TECNOLÓGICO NACIONAL DE MÉXICO',
+            ['size' => 14, 'bold' => true, 'color' => '969696'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
+        );
 
-            $section->addText(
-                'A TRAVÉS DEL INSTITUTO TECNOLÓGICO SUPERIOR ZACATECAS OCCIDENTE',
-                ['size' => 12, 'color' => '969696'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
-            );
+        $section->addText(
+            'A TRAVÉS DEL INSTITUTO TECNOLÓGICO SUPERIOR ZACATECAS OCCIDENTE',
+            ['size' => 12, 'color' => '969696'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
+        );
 
-            $section->addText(
-                'OTORGA LA PRESENTE:',
-                ['size' => 12, 'color' => 'ACACAC'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 400]
-            );
+        $section->addText(
+            'OTORGA LA PRESENTE:',
+            ['size' => 12, 'color' => 'ACACAC'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 400]
+        );
 
-            // CONSTANCIA
-            $section->addText(
-                'CONSTANCIA',
-                ['size' => 40, 'bold' => true, 'color' => 'D4A548'], 
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 500]
-            );
+        // CONSTANCIA
+        $section->addText(
+            'CONSTANCIA',
+            ['size' => 40, 'bold' => true, 'color' => 'D4A548'], 
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 500]
+        );
 
-            // A: Nombre
-            $run = $section->addTextRun(['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 400]);
-            $run->addText('A: ', ['size' => 14, 'color' => '000000']);
-            $run->addText(strtoupper($validated['nombre_completo']), [
-                'size' => 14,
-                'color' => '6B6B6B',
-                'bold' => false
+        // A: Nombre
+        $run = $section->addTextRun([
+            'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 
+            'spaceAfter' => 400
+        ]);
+        $run->addText('A: ', ['size' => 14, 'color' => '000000']);
+        $run->addText(strtoupper($validated['nombre_completo']), [
+            'size' => 14,
+            'color' => '6B6B6B',
+            'bold' => false
+        ]);
+
+        // Párrafo "Por su participación como facilitador..."
+        $runText = $section->addTextRun([
+            'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
+            'spaceAfter' => 100
+        ]);
+        $runText->addText('Por su participación como ', ['size' => 13, 'color' => '000000']);
+        $runText->addText('facilitador', ['size' => 13, 'color' => 'C00000', 'bold' => true]);
+        $runText->addText(' del curso de', ['size' => 13, 'color' => '000000']);
+
+        // Segunda línea: "formación denominado"
+        $runText2 = $section->addTextRun([
+            'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
+            'spaceAfter' => 100
+        ]);
+        $runText2->addText('formación', ['size' => 13, 'color' => 'C00000', 'underline' => 'single']);
+        $runText2->addText(' denominado', ['size' => 13, 'color' => '000000']);
+
+        // Nombre del curso
+        $section->addText(
+            '"' . $validated['curso'] . '"',
+            ['size' => 13, 'color' => '000000'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 200]
+        );
+
+        // Fecha
+        $fechaInicio = \Carbon\Carbon::parse($validated['fecha_inicio'])->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
+        $section->addText(
+            "Impartido el día {$fechaInicio}.",
+            ['size' => 13, 'color' => '000000'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
+        );
+        
+        // Duración
+        $section->addText(
+            "Con una duración de {$validated['horas']}",
+            ['size' => 13, 'color' => '000000'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 1000]
+        );
+
+        /*
+        |---------------------------------------------------------
+        | LÍNEA DE FIRMA Y DATOS DEL FIRMANTE
+        |---------------------------------------------------------
+        */
+        
+        // Línea para la firma (centrada)
+        $section->addText(
+            '_______________________________________________',
+            ['size' => 12, 'color' => '000000'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
+        );
+        
+        // Nombre del director
+        $section->addText(
+            strtoupper($validated['nombre_director']),
+            ['size' => 12, 'color' => '000000'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 50]
+        );
+        
+        // Puesto del director
+        $section->addText(
+            strtoupper($validated['puesto_director']),
+            ['size' => 12, 'bold' => true, 'color' => '000000'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 500]
+        );
+
+        // Fecha y lugar
+        $section->addText(
+            $validated['lugar'] . ', Zac. a ' . now()->locale('es')->isoFormat('D [de] MMMM [de] YYYY'),
+            ['size' => 12, 'color' => 'D4A548'],
+            ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]
+        );
+
+        /*
+        |---------------------------------------------------------
+        | CÓDIGO QR PARA VALIDACIÓN
+        |---------------------------------------------------------
+        */
+        $section->addTextBreak(1);
+        
+        if (file_exists($qrPath)) {
+            // Agregar QR centrado
+            $qrRun = $section->addTextRun([
+                'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
             ]);
-
-            // Párrafo "Por su participación como facilitador..."
-            $runText = $section->addTextRun([
-                'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
-                'spaceAfter' => 100
+            
+            $qrRun->addImage($qrPath, [
+                'width'  => 100,
+                'height' => 100,
             ]);
-            $runText->addText('Por su participación como ', ['size' => 13, 'color' => '000000']);
-            $runText->addText('facilitador', ['size' => 13, 'color' => 'C00000', 'bold' => true]);
-            $runText->addText(' del curso de', ['size' => 13, 'color' => '000000']);
-
-            // Segunda línea: "formación denominado"
-            $runText2 = $section->addTextRun([
-                'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
-                'spaceAfter' => 100
-            ]);
-            $runText2->addText('formación', ['size' => 13, 'color' => 'C00000', 'underline' => 'single']);
-            $runText2->addText(' denominado', ['size' => 13, 'color' => '000000']);
-
-            // Nombre del curso
-            $section->addText(
-                '"' . $validated['curso'] . '"',
-                ['size' => 13, 'color' => '000000'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 200]
-            );
-
-            // Fecha
-            $fechaInicio = \Carbon\Carbon::parse($validated['fecha_inicio'])->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
-            $section->addText(
-                "Impartido el día {$fechaInicio}.",
-                ['size' => 13, 'color' => '000000'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
-            );
             
-            // Duración
+            // Texto "Escanea para validar"
             $section->addText(
-                "Con una duración de {$validated['horas']} horas",
-                ['size' => 13, 'color' => '000000'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 1000]
-            );
-
-            /*
-            |---------------------------------------------------------
-            | LÍNEA DE FIRMA Y DATOS DEL FIRMANTE
-            |---------------------------------------------------------
-            */
-            
-            // Línea para la firma (centrada)
-            $section->addText(
-                '_______________________________________________',
-                ['size' => 12, 'color' => '000000'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
-            );
-            
-            // Nombre del director
-            $section->addText(
-                strtoupper($validated['nombre_director']),
-                ['size' => 12, 'color' => '000000'],
+                'Escanea para validar',
+                ['size' => 9, 'color' => '666666', 'italic' => true],
                 ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 50]
             );
             
-            // Puesto del director
+            // Folio de la constancia
             $section->addText(
-                strtoupper($validated['puesto_director']),
-                ['size' => 12, 'bold' => true, 'color' => '000000'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 500]
+                'Folio: ' . $constanciaEmitida->folio,
+                ['size' => 8, 'color' => '999999'],
+                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
             );
+        }
 
-            // Fecha y lugar
-            $section->addText(
-                $validated['lugar'] . ', Zac. a ' . now()->locale('es')->isoFormat('D [de] MMMM [de] YYYY'),
-                ['size' => 12, 'color' => 'D4A548'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]
-            );
-
-            /*
-            |---------------------------------------------------------
-            | LOGO INFERIOR (Con márgenes en las orillas)
-            |---------------------------------------------------------
-            */
-            $section->addTextBreak(2);
-            
-            // Usar TextRun para agregar márgenes laterales
-            $logoInferiorRun = $section->addTextRun([
-                'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT,
-                'indentation' => [
-                    'left' => 200,   // Margen izquierdo
-                    'right' => 200   // Margen derecho
-                ]
-            ]);
-            
+        /*
+        |---------------------------------------------------------
+        | LOGO INFERIOR (Con márgenes en las orillas)
+        |---------------------------------------------------------
+        */
+        $section->addTextBreak(1);
+        
+        // Usar TextRun para agregar márgenes laterales
+        $logoInferiorRun = $section->addTextRun([
+            'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT,
+            'indentation' => [
+                'left' => 200,
+                'right' => 200
+            ]
+        ]);
+        
+        if (file_exists(public_path('storage/ITSZO.png'))) {
             $logoInferiorRun->addImage(public_path('storage/ITSZO.png'), [
                 'width'  => 80,
                 'height' => 80,
             ]);
-
-            /*
-            |---------------------------------------------------------
-            | GUARDAR Y DESCARGAR
-            |---------------------------------------------------------
-            */
-            $fileName = 'constancia-' . \Illuminate\Support\Str::slug($validated['nombre_completo']) . '.docx';
-            $path = storage_path('app/' . $fileName);
-
-            $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-            $objWriter->save($path);
-
-            return response()->download($path)->deleteFileAfterSend(true);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
         }
+
+        /*
+        |---------------------------------------------------------
+        | GUARDAR Y DESCARGAR
+        |---------------------------------------------------------
+        */
+        $fileName = 'constancia-facilitador-' . \Illuminate\Support\Str::slug($validated['nombre_completo']) . '.docx';
+        $path = storage_path('app/' . $fileName);
+
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+        $objWriter->save($path);
+
+        \Log::info('Documento guardado en: ' . $path);
+
+        // Eliminar el QR temporal después de guardar el documento
+        if (file_exists($qrPath)) {
+            @unlink($qrPath);
+            \Log::info('QR temporal eliminado');
+        }
+
+        // Retornar archivo para descarga
+        return response()->download($path, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ])->deleteFileAfterSend(true);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Error de validación: ' . json_encode($e->errors()));
+        return response()->json([
+            'message' => 'Error de validación',
+            'errors' => $e->errors()
+        ], 422);
+        
+    } catch (\Exception $e) {
+        \Log::error('Error generando constancia de facilitador: ' . $e->getMessage());
+        \Log::error($e->getTraceAsString());
+        
+        return response()->json([
+            'message' => 'Error al generar la constancia',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
     // Actualiza también el método createDocentes para pasar los docentes
     public function createDocentes($id)
@@ -603,345 +678,395 @@ class ConstanciaController extends Controller
         ]);
     }
 
-    public function generateDocentes(Request $request)
-{
-    try {
-        // Validar datos base
-        $validated = $request->validate([
-            'capacitacion_id' => 'required|exists:capacitaciones,id',
-            'curso' => 'required|string',
-            'horas' => 'required|string',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date',
-            'lugar' => 'required|string',
-            'nombre_director' => 'required|string',
-            'puesto_director' => 'required|string',
-        ]);
-
-        \Log::info('Generando constancias para capacitación ID: ' . $validated['capacitacion_id']);
-
-        $capacitacion = Constancia::with('docentes')->findOrFail($validated['capacitacion_id']);
-
-        // Verificar que haya docentes
-        if ($capacitacion->docentes->isEmpty()) {
-            \Log::warning('No hay docentes para la capacitación ' . $capacitacion->id);
-            return response()->json([
-                'message' => 'No hay docentes registrados para esta capacitación'
-            ], 400);
-        }
-
-        \Log::info('Docentes encontrados: ' . $capacitacion->docentes->count());
-
-        // Crear nombre del ZIP
-        $zipFileName = "constancias-docentes-{$capacitacion->id}-" . date('Ymd-His') . ".zip";
-        $zipPath = storage_path("app/{$zipFileName}");
-        
-        \Log::info('Ruta del ZIP: ' . $zipPath);
-
-        // Crear ZIP
-        $zip = new \ZipArchive();
-        $zipStatus = $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-
-        if ($zipStatus !== true) {
-            \Log::error('No se pudo crear el ZIP. Código de error: ' . $zipStatus);
-            throw new \Exception('No se pudo crear el archivo ZIP. Código: ' . $zipStatus);
-        }
-
-        \Log::info('ZIP creado exitosamente');
-
-        $archivosTemporales = [];
-        $contador = 0;
-
-        // Generar constancia para cada docente
-        foreach ($capacitacion->docentes as $docente) {
-            $nombreCompleto = trim(
-                "{$docente->nombres} {$docente->apellido_paterno} {$docente->apellido_materno}"
-            );
-
-            \Log::info("Generando constancia para: {$nombreCompleto}");
-
-            $hash = (string) Str::uuid();
-
-            $constancia = Constancias::create([
-                'capacitacion_id'     => $capacitacion->id,
-                'folio'               => $capacitacion->folio_fechaemision . '-' . strtoupper(Str::random(5)),
-                'hash'                => $hash,
-                'tipo'                => 'docente',
-                'nombre_beneficiario' => $nombreCompleto,
-                'fecha_emision'       => now(),
+   public function generateDocentes(Request $request)
+    {
+        try {
+            // Validar datos base
+            $validated = $request->validate([
+                'capacitacion_id' => 'required|exists:capacitaciones,id',
+                'curso' => 'required|string',
+                'horas' => 'required|string',
+                'fecha_inicio' => 'required|date',
+                'fecha_fin' => 'required|date',
+                'lugar' => 'required|string',
+                'nombre_director' => 'required|string',
+                'puesto_director' => 'required|string',
             ]);
 
-            // 🔳 Generar QR
-            $url = route('capacitaciones.constancias.validar', $hash);
-            $qrPath = storage_path("app/qr-{$hash}.png");
+            \Log::info('Generando constancias para capacitación ID: ' . $validated['capacitacion_id']);
 
-            QrCode::format('png')
-                ->size(200)
-                ->useGD()
-                ->generate($url, $qrPath);
+            $capacitacion = Constancia::with('docentes')->findOrFail($validated['capacitacion_id']);
 
-            $phpWord = new \PhpOffice\PhpWord\PhpWord();
+            // Verificar que haya docentes
+            if ($capacitacion->docentes->isEmpty()) {
+                \Log::warning('No hay docentes para la capacitación ' . $capacitacion->id);
+                return response()->json([
+                    'message' => 'No hay docentes registrados para esta capacitación'
+                ], 400);
+            }
 
-            // Configuración de la sección solo con margen y borde superior
-            $section = $phpWord->addSection([
-                'marginTop'        => 850,
-                'marginBottom'     => 850,
-                'marginLeft'       => 0,
-                'marginRight'      => 0,
-                // Solo borde superior
-                'borderTopColor'   => 'FFFFFF',
-                'borderTopSize'    => 12,
-            ]);
+            \Log::info('Docentes encontrados: ' . $capacitacion->docentes->count());
 
-            /*
-            |---------------------------------------------------------
-            | FRANJA LATERAL DERECHA (FUERA DEL MARCO)
-            |---------------------------------------------------------
-            */
-            $franjaPath = public_path('storage/franja.png');
-            if (file_exists($franjaPath)) {
-                $section->addImage($franjaPath, [
-                    'width'            => 90,
-                    'height'           => 842,
-                    'positioning'      => 'absolute',
-                    'posHorizontal'    => 'absolute',
-                    'posVertical'      => 'absolute',
-                    'left'             => 545,
-                    'top'              => 0,
-                    'posHorizontalRel' => 'page',
-                    'posVerticalRel'   => 'page',
-                    'wrappingStyle'    => 'behind',
+            // Crear nombre del ZIP
+            $zipFileName = "constancias-docentes-{$capacitacion->id}-" . date('Ymd-His') . ".zip";
+            $zipPath = storage_path("app/{$zipFileName}");
+            
+            \Log::info('Ruta del ZIP: ' . $zipPath);
+
+            // Crear ZIP
+            $zip = new \ZipArchive();
+            $zipStatus = $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+            if ($zipStatus !== true) {
+                \Log::error('No se pudo crear el ZIP. Código de error: ' . $zipStatus);
+                throw new \Exception('No se pudo crear el archivo ZIP. Código: ' . $zipStatus);
+            }
+
+            \Log::info('ZIP creado exitosamente');
+
+            $archivosTemporales = [];
+            $contador = 0;
+
+            // Generar constancia para cada docente
+            foreach ($capacitacion->docentes as $docente) {
+                $nombreCompleto = trim(
+                    "{$docente->nombres} {$docente->apellido_paterno} {$docente->apellido_materno}"
+                );
+
+                \Log::info("Generando constancia para: {$nombreCompleto}");
+
+                $hash = (string) Str::uuid();
+
+                $constancia = Constancias::create([
+                    'capacitacion_id'     => $capacitacion->id,
+                    'folio'               => $capacitacion->folio_fechaemision . '-' . strtoupper(Str::random(5)),
+                    'hash'                => $hash,
+                    'tipo'                => 'docente',
+                    'nombre_beneficiario' => $nombreCompleto,
+                    'fecha_emision'       => now(),
                 ]);
+
+                // Generar QR Code
+                $url = route('constancias.validar', $hash);
+                $qrPath = storage_path("app/qr-{$hash}.png");
+
+                $result = Builder::create()
+                    ->writer(new PngWriter())
+                    ->data($url)
+                    ->size(300)
+                    ->margin(10)
+                    ->build();
+
+                $result->saveToFile($qrPath);
+
+                $phpWord = new \PhpOffice\PhpWord\PhpWord();
+
+                // Configuración de la sección
+                $section = $phpWord->addSection([
+                    'marginTop'        => 850,
+                    'marginBottom'     => 850,
+                    'marginLeft'       => 0,
+                    'marginRight'      => 0,
+                    'borderTopColor'   => 'FFFFFF',
+                    'borderTopSize'    => 12,
+                ]);
+
+                /*
+                |---------------------------------------------------------
+                | FRANJA LATERAL DERECHA (FUERA DEL MARCO)
+                |---------------------------------------------------------
+                */
+                $franjaPath = public_path('storage/franja.png');
+                if (file_exists($franjaPath)) {
+                    $section->addImage($franjaPath, [
+                        'width'            => 90,
+                        'height'           => 842,
+                        'positioning'      => 'absolute',
+                        'posHorizontal'    => 'absolute',
+                        'posVertical'      => 'absolute',
+                        'left'             => 545,
+                        'top'              => 0,
+                        'posHorizontalRel' => 'page',
+                        'posVerticalRel'   => 'page',
+                        'wrappingStyle'    => 'behind',
+                    ]);
+                }
+
+                /*
+                |---------------------------------------------------------
+                | LOGOS SUPERIORES (UNO AL LADO DEL OTRO)
+                |---------------------------------------------------------
+                */
+                $section->addTextBreak(1);
+                
+                // TextRun alineado a la izquierda para los logos
+                $logosRun = $section->addTextRun([
+                    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, 
+                    'indentation' => ['left' => 200]
+                ]);
+                
+                // Logo Educación
+                if (file_exists(public_path('storage/educacion.png'))) {
+                    $logosRun->addImage(public_path('storage/educacion.png'), [
+                        'width'  => 200,
+                        'height' => 60,
+                    ]);
+                }
+                
+                // Logo TecNM
+                if (file_exists(public_path('storage/tecnm.png'))) {
+                    $logosRun->addImage(public_path('storage/tecnm.png'), [
+                        'width'  => 160,
+                        'height' => 60,
+                    ]);
+                }
+                
+                // Logo Secretaría
+                if (file_exists(public_path('storage/secretaria.png'))) {
+                    $logosRun->addImage(public_path('storage/secretaria.png'), [
+                        'width'  => 160,
+                        'height' => 60,
+                    ]);
+                }
+
+                /*
+                |---------------------------------------------------------
+                | CUERPO DEL DOCUMENTO (CENTRADO)
+                |---------------------------------------------------------
+                */
+                
+                $section->addTextBreak(2);
+                
+                // Encabezado principal
+                $section->addText(
+                    'EL TECNOLÓGICO NACIONAL DE MÉXICO',
+                    ['size' => 14, 'bold' => true, 'color' => '969696'],
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
+                );
+
+                $section->addText(
+                    'A TRAVÉS DEL INSTITUTO TECNOLÓGICO SUPERIOR ZACATECAS OCCIDENTE',
+                    ['size' => 12, 'color' => '969696'],
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
+                );
+
+                $section->addText(
+                    'OTORGA LA PRESENTE:',
+                    ['size' => 12, 'color' => 'ACACAC'],
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 400]
+                );
+
+                // CONSTANCIA
+                $section->addText(
+                    'CONSTANCIA',
+                    ['size' => 40, 'bold' => true, 'color' => 'D4A548'], 
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 500]
+                );
+
+                // A: Nombre
+                $run = $section->addTextRun([
+                    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 
+                    'spaceAfter' => 400
+                ]);
+                $run->addText('A: ', ['size' => 14, 'color' => '000000']);
+                $run->addText(strtoupper($nombreCompleto), [
+                    'size' => 14,
+                    'color' => '6B6B6B',
+                    'bold' => false
+                ]);
+
+                // Párrafo "Por su participación como docente..."
+                $runText = $section->addTextRun([
+                    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
+                    'spaceAfter' => 100
+                ]);
+                $runText->addText('Por su participación como ', ['size' => 13, 'color' => '000000']);
+                $runText->addText('docente', ['size' => 13, 'color' => 'C00000', 'bold' => true]);
+                $runText->addText(' del curso de', ['size' => 13, 'color' => '000000']);
+
+                // Segunda línea: "formación denominado"
+                $runText2 = $section->addTextRun([
+                    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
+                    'spaceAfter' => 100
+                ]);
+                $runText2->addText('formación', ['size' => 13, 'color' => 'C00000', 'underline' => 'single']);
+                $runText2->addText(' denominado', ['size' => 13, 'color' => '000000']);
+
+                // Nombre del curso
+                $section->addText(
+                    '"' . $validated['curso'] . '"',
+                    ['size' => 13, 'color' => '000000'],
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 200]
+                );
+
+                // Fecha
+                $fechaInicio = \Carbon\Carbon::parse($validated['fecha_inicio'])->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
+                $section->addText(
+                    "Impartido el día {$fechaInicio}.",
+                    ['size' => 13, 'color' => '000000'],
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
+                );
+                
+                // Duración
+                $section->addText(
+                    "Con una duración de {$validated['horas']}",
+                    ['size' => 13, 'color' => '000000'],
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 1000]
+                );
+
+                /*
+                |---------------------------------------------------------
+                | LÍNEA DE FIRMA Y DATOS DEL FIRMANTE
+                |---------------------------------------------------------
+                */
+                
+                // Línea para la firma (centrada)
+                $section->addText(
+                    '_______________________________________________',
+                    ['size' => 12, 'color' => '000000'],
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
+                );
+                
+                // Nombre del director
+                $section->addText(
+                    strtoupper($validated['nombre_director']),
+                    ['size' => 12, 'color' => '000000'],
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 50]
+                );
+                
+                // Puesto del director
+                $section->addText(
+                    strtoupper($validated['puesto_director']),
+                    ['size' => 12, 'bold' => true, 'color' => '000000'],
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 500]
+                );
+
+                // Fecha y lugar
+                $section->addText(
+                    $validated['lugar'] . ', Zac. a ' . now()->locale('es')->isoFormat('D [de] MMMM [de] YYYY'),
+                    ['size' => 12, 'color' => 'D4A548'],
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]
+                );
+
+                /*
+                |---------------------------------------------------------
+                | CÓDIGO QR PARA VALIDACIÓN
+                |---------------------------------------------------------
+                */
+                $section->addTextBreak(1);
+                
+                if (file_exists($qrPath)) {
+                    // Agregar QR centrado
+                    $qrRun = $section->addTextRun([
+                        'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER
+                    ]);
+                    
+                    $qrRun->addImage($qrPath, [
+                        'width'  => 100,
+                        'height' => 100,
+                    ]);
+                    
+                    // Texto "Escanea para validar"
+                    $section->addText(
+                        'Escanea para validar',
+                        ['size' => 9, 'color' => '666666', 'italic' => true],
+                        ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 50]
+                    );
+                    
+                    // Folio de la constancia
+                    $section->addText(
+                        'Folio: ' . $constancia->folio,
+                        ['size' => 8, 'color' => '999999'],
+                        ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
+                    );
+                }
+
+                /*
+                |---------------------------------------------------------
+                | LOGO INFERIOR (Con márgenes en las orillas)
+                |---------------------------------------------------------
+                */
+                $section->addTextBreak(1);
+                
+                // Usar TextRun para agregar márgenes laterales
+                $logoInferiorRun = $section->addTextRun([
+                    'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT,
+                    'indentation' => [
+                        'left' => 200,
+                        'right' => 200
+                    ]
+                ]);
+                
+                if (file_exists(public_path('storage/ITSZO.png'))) {
+                    $logoInferiorRun->addImage(public_path('storage/ITSZO.png'), [
+                        'width'  => 80,
+                        'height' => 80,
+                    ]);
+                }
+
+                // Guardar archivo temporal
+                $fileName = 'constancia-' . \Illuminate\Support\Str::slug($nombreCompleto) . '.docx';
+                $tempPath = storage_path('app/' . $fileName);
+                
+                $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+                $writer->save($tempPath);
+                
+                \Log::info("Archivo guardado: {$tempPath}");
+                
+                // Agregar al ZIP
+                if (file_exists($tempPath)) {
+                    $zip->addFile($tempPath, $fileName);
+                    $archivosTemporales[] = $tempPath;
+                    $archivosTemporales[] = $qrPath; // Agregar QR a lista de archivos temporales
+                    $contador++;
+                    \Log::info("Archivo agregado al ZIP: {$fileName}");
+                } else {
+                    \Log::error("No se pudo encontrar el archivo temporal: {$tempPath}");
+                }
             }
 
-            /*
-            |---------------------------------------------------------
-            | LOGOS SUPERIORES (UNO AL LADO DEL OTRO)
-            |---------------------------------------------------------
-            */
-            $section->addTextBreak(1);
-            
-            // TextRun alineado a la izquierda para los logos
-            $logosRun = $section->addTextRun(['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT, 'indentation' => ['left' => 200]]);
-            
-            // Logo Educación
-            $logosRun->addImage(public_path('storage/educacion.png'), [
-                'width'  => 200,
-                'height' => 60,
-            ]);
-            
-            // Logo TecNM
-            $logosRun->addImage(public_path('storage/tecnm.png'), [
-                'width'  => 160,
-                'height' => 60,
-            ]);
-            
-            // Logo Secretaría
-            $logosRun->addImage(public_path('storage/secretaria.png'), [
-                'width'  => 160,
-                'height' => 60,
-            ]);
+            $zip->close();
 
-            /*
-            |---------------------------------------------------------
-            | CUERPO DEL DOCUMENTO (CENTRADO)
-            |---------------------------------------------------------
-            */
-            
-            $section->addTextBreak(2);
-            
-            // Encabezado principal
-            $section->addText(
-                'EL TECNOLÓGICO NACIONAL DE MÉXICO',
-                ['size' => 14, 'bold' => true, 'color' => '969696'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
-            );
+            \Log::info("ZIP cerrado. Total de archivos: {$contador}");
+            \Log::info("Ruta del ZIP: {$zipPath}");
 
-            $section->addText(
-                'A TRAVÉS DEL INSTITUTO TECNOLÓGICO SUPERIOR ZACATECAS OCCIDENTE',
-                ['size' => 12, 'color' => '969696'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
-            );
-
-            $section->addText(
-                'OTORGA LA PRESENTE:',
-                ['size' => 12, 'color' => 'ACACAC'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 400]
-            );
-
-            // CONSTANCIA
-            $section->addText(
-                'CONSTANCIA',
-                ['size' => 40, 'bold' => true, 'color' => 'D4A548'], 
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 500]
-            );
-
-            // A: Nombre
-            $run = $section->addTextRun(['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 400]);
-            $run->addText('A: ', ['size' => 14, 'color' => '000000']);
-            $run->addText(strtoupper($nombreCompleto), [
-                'size' => 14,
-                'color' => '6B6B6B',
-                'bold' => false
-            ]);
-
-            // Párrafo "Por su participación como facilitador..."
-            $runText = $section->addTextRun([
-                'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
-                'spaceAfter' => 100
-            ]);
-            $runText->addText('Por su participación como ', ['size' => 13, 'color' => '000000']);
-            $runText->addText('docente', ['size' => 13, 'color' => 'C00000', 'bold' => true]); // ← CAMBIO: "docente" en lugar de "facilitador"
-            $runText->addText(' del curso de', ['size' => 13, 'color' => '000000']);
-
-            // Segunda línea: "formación denominado"
-            $runText2 = $section->addTextRun([
-                'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
-                'spaceAfter' => 100
-            ]);
-            $runText2->addText('formación', ['size' => 13, 'color' => 'C00000', 'underline' => 'single']);
-            $runText2->addText(' denominado', ['size' => 13, 'color' => '000000']);
-
-            // Nombre del curso
-            $section->addText(
-                '"' . $validated['curso'] . '"',
-                ['size' => 13, 'color' => '000000'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 200]
-            );
-
-            // Fecha
-            $fechaInicio = \Carbon\Carbon::parse($validated['fecha_inicio'])->locale('es')->isoFormat('D [de] MMMM [de] YYYY');
-            $section->addText(
-                "Impartido el día {$fechaInicio}.",
-                ['size' => 13, 'color' => '000000'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
-            );
-            
-            // Duración
-            $section->addText(
-                "Con una duración de {$validated['horas']} horas",
-                ['size' => 13, 'color' => '000000'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 1000]
-            );
-
-            /*
-            |---------------------------------------------------------
-            | LÍNEA DE FIRMA Y DATOS DEL FIRMANTE
-            |---------------------------------------------------------
-            */
-            
-            // Línea para la firma (centrada)
-            $section->addText(
-                '_______________________________________________',
-                ['size' => 12, 'color' => '000000'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 100]
-            );
-            
-            // Nombre del director
-            $section->addText(
-                strtoupper($validated['nombre_director']),
-                ['size' => 12, 'color' => '000000'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 50]
-            );
-            
-            // Puesto del director
-            $section->addText(
-                strtoupper($validated['puesto_director']),
-                ['size' => 12, 'bold' => true, 'color' => '000000'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER, 'spaceAfter' => 500]
-            );
-
-            // Fecha y lugar
-            $section->addText(
-                $validated['lugar'] . ', Zac. a ' . now()->locale('es')->isoFormat('D [de] MMMM [de] YYYY'),
-                ['size' => 12, 'color' => 'D4A548'],
-                ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]
-            );
-
-            /*
-            |---------------------------------------------------------
-            | LOGO INFERIOR (Con márgenes en las orillas)
-            |---------------------------------------------------------
-            */
-            $section->addTextBreak(2);
-            
-            // Usar TextRun para agregar márgenes laterales
-            $logoInferiorRun = $section->addTextRun([
-                'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT,
-                'indentation' => [
-                    'left' => 200,   // Margen izquierdo
-                    'right' => 200   // Margen derecho
-                ]
-            ]);
-            
-            $logoInferiorRun->addImage(public_path('storage/ITSZO.png'), [
-                'width'  => 80,
-                'height' => 80,
-            ]);
-
-            // Guardar archivo temporal
-            $fileName = 'constancia-' . \Illuminate\Support\Str::slug($nombreCompleto) . '.docx';
-            $tempPath = storage_path('app/' . $fileName);
-            
-            $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-            $writer->save($tempPath);
-            
-            \Log::info("Archivo guardado: {$tempPath}");
-            
-            // Agregar al ZIP
-            if (file_exists($tempPath)) {
-                $zip->addFile($tempPath, $fileName);
-                $archivosTemporales[] = $tempPath;
-                $contador++;
-                \Log::info("Archivo agregado al ZIP: {$fileName}");
-            } else {
-                \Log::error("No se pudo encontrar el archivo temporal: {$tempPath}");
+            // Verificar que el ZIP se creó correctamente
+            if (!file_exists($zipPath)) {
+                throw new \Exception('El archivo ZIP no se creó correctamente');
             }
 
-            @unlink($qrPath);
-        }
-
-        $zip->close();
-
-        \Log::info("ZIP cerrado. Total de archivos: {$contador}");
-        \Log::info("Ruta del ZIP: {$zipPath}");
-
-        // Verificar que el ZIP se creó correctamente
-        if (!file_exists($zipPath)) {
-            throw new \Exception('El archivo ZIP no se creó correctamente');
-        }
-
-        // Limpiar archivos temporales
-        foreach ($archivosTemporales as $file) {
-            if (file_exists($file)) {
-                @unlink($file);
+            // Limpiar archivos temporales (incluyendo QRs)
+            foreach ($archivosTemporales as $file) {
+                if (file_exists($file)) {
+                    @unlink($file);
+                    \Log::info("Archivo temporal eliminado: {$file}");
+                }
             }
+
+            \Log::info("Descargando ZIP...");
+
+            // Devolver el archivo para descarga
+            return response()->download($zipPath, $zipFileName, [
+                'Content-Type' => 'application/zip',
+            ])->deleteFileAfterSend(true);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Error de validación: ' . json_encode($e->errors()));
+            return response()->json([
+                'message' => 'Error de validación',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error generando constancias múltiples: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            
+            return response()->json([
+                'message' => 'Error al generar las constancias',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        \Log::info("Descargando ZIP...");
-
-        // Devolver el archivo para descarga
-        return response()->download($zipPath, $zipFileName, [
-            'Content-Type' => 'application/zip',
-        ])->deleteFileAfterSend(true);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        \Log::error('Error de validación: ' . json_encode($e->errors()));
-        return response()->json([
-            'message' => 'Error de validación',
-            'errors' => $e->errors()
-        ], 422);
-        
-    } catch (\Exception $e) {
-        \Log::error('Error generando constancias múltiples: ' . $e->getMessage());
-        \Log::error($e->getTraceAsString());
-        
-        return response()->json([
-            'message' => 'Error al generar las constancias',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 
 
     public function validar($hash)
@@ -950,7 +1075,9 @@ class ConstanciaController extends Controller
             ->where('hash', $hash)
             ->first();
 
-        return view('constancias.validar', compact('constancia'));
+        return Inertia::render('capacitaciones/Validar', [
+            'constancia' => $constancia
+        ]);
     }
 
     public function buscar(Request $request)

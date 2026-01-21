@@ -44,7 +44,7 @@ export default function Index({ registros, filters, carreras, anios }) {
               href={route("docentes.activardocente.create")}
               className="bg-red-800 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition"
             >
-              + Crear
+              Activar
             </Link>
           </div>
         </div>

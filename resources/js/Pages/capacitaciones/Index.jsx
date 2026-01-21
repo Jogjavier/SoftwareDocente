@@ -40,7 +40,7 @@ export default function Index({ constancias = [], filters }) {
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-4">
                         <img src="/storage/logo.webp" alt="Logo" className="h-20 rounded" />
-                        <img src="/storage/ITSZO.webp" alt="ITSZO" className="h-20 rounded" />
+                        <img src="/storage/ITSZO.png" alt="ITSZO" className="h-20 rounded" />
                     </div>
                     <h1 className="text-3xl font-bold text-white text-center flex-1">
                         Listado de Cursos y Constancias
