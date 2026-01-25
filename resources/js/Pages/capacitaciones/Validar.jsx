@@ -59,7 +59,7 @@ export default function Validar({ constancia = null }) {
 
             <div className="space-y-3 text-sm sm:text-base">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 py-2 border-b border-gray-100">
-                <span className="font-semibold text-gray-600">Facilitador:</span>
+                <span className="font-semibold text-gray-600">Instructor:</span>
                 <span className="sm:col-span-2 text-gray-800">{constancia.nombre_beneficiario}</span>
               </div>
 
@@ -69,18 +69,28 @@ export default function Validar({ constancia = null }) {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 py-2 border-b border-gray-100">
+                <span className="font-semibold text-gray-600">Autoridad Educativa:</span>
+                <span className="sm:col-span-2 text-gray-800">{constancia.capacitacion.autoridad_educativa}</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 py-2 border-b border-gray-100">
                 <span className="font-semibold text-gray-600">Duración:</span>
                 <span className="sm:col-span-2 text-gray-800">{constancia.capacitacion.duracion_horas} horas</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 py-2 border-b border-gray-100">
-                <span className="font-semibold text-gray-600">Fecha de emisión:</span>
-                <span className="sm:col-span-2 text-gray-800">{constancia.fecha_emision}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 py-2">
+                <span className="font-semibold text-gray-600">Tipo:</span>
+                <span className="sm:col-span-2 text-gray-800 font-mono">{constancia.capacitacion.tipo}</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 py-2">
-                <span className="font-semibold text-gray-600">Folio:</span>
-                <span className="sm:col-span-2 text-gray-800 font-mono">{constancia.folio}</span>
+                <span className="font-semibold text-gray-600">Modalidad:</span>
+                <span className="sm:col-span-2 text-gray-800 font-mono">{constancia.capacitacion.modalidad}</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 py-2 border-b border-gray-100">
+                <span className="font-semibold text-gray-600">Fecha de emisión:</span>
+                <span className="sm:col-span-2 text-gray-800">{constancia.capacitacion.folio_fechaemision}</span>
               </div>
             </div>
           </section>
