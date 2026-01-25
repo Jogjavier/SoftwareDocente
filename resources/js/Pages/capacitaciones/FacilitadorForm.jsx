@@ -5,9 +5,12 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
     const [formData, setFormData] = useState({
         capacitacion_id: capacitacion.id,
         ...datos_default,
-        lugar: datos_default.lugar || 'Santiago Papasquiaro, Durango',
+        tipo: capacitacion.tipo,
+        modalidad: capacitacion.modalidad,
+        lugar: datos_default.lugar || 'Sombrerete, Zac',
+        fecha_emision: datos_default.fecha_emision || new Date().toISOString().split('T')[0],
         nombre_director: datos_default.nombre_director || '',
-        puesto_director: datos_default.puesto_director || 'Director de Capacitación'
+        puesto_director: datos_default.puesto_director || 'DIRECTORA GENERAL'
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -32,6 +35,7 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': document
                             .querySelector('meta[name="csrf-token"]')
                             .content,
@@ -235,6 +239,21 @@ export default function FacilitadorForm({ capacitacion, datos_default }) {
                                 required
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                 placeholder="Ej: Santiago Papasquiaro, Durango"
+                            />
+                        </div>
+
+                        {/* Fecha de emisión de la constancia */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Fecha de emisión en la constancia *
+                            </label>
+                            <input
+                                type="date"
+                                name="fecha_emision"
+                                value={formData.fecha_emision}
+                                onChange={handleChange}
+                                required
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                             />
                         </div>
 

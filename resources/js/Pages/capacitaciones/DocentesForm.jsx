@@ -5,10 +5,13 @@ export default function DocentesForm({ capacitacion, datos_default, docentes }) 
     const [formData, setFormData] = useState({
         capacitacion_id: capacitacion.id,
         curso: datos_default.curso || capacitacion.nombre,
+        tipo: capacitacion.tipo,
+        modalidad: capacitacion.modalidad,
         horas: datos_default.horas || capacitacion.duracion_horas + ' horas',
         fecha_inicio: datos_default.fecha_inicio || capacitacion.fecha_inicio,
         fecha_fin: datos_default.fecha_fin || capacitacion.fecha_fin,
         lugar: datos_default.lugar || 'Sombrerete, Zacatecas',
+        fecha_emision: datos_default.fecha_emision || new Date().toISOString().split('T')[0],
         nombre_director: datos_default.nombre_director || '',
         puesto_director: datos_default.puesto_director || 'DIRECTORA GENERAL',
     });
@@ -20,6 +23,15 @@ export default function DocentesForm({ capacitacion, datos_default, docentes }) 
             ...prev,
             [name]: value
         }));
+    };
+
+    const actualizarDocente = (index, campo, valor) => {
+        const nuevosDocentes = [...docentes];
+        nuevosDocentes[index] = {
+            ...nuevosDocentes[index],
+            [campo]: valor
+        };
+        setDocentes(nuevosDocentes);
     };
 
     const handleSubmit = async (e) => {
@@ -156,9 +168,37 @@ export default function DocentesForm({ capacitacion, datos_default, docentes }) 
                                             <span className="inline-block w-6 h-6 rounded-full bg-green-200 text-green-800 text-xs flex items-center justify-center mr-2">
                                                 {index + 1}
                                             </span>
-                                            <span>
-                                                {docente.nombres} {docente.apellido_paterno} {docente.apellido_materno}
-                                            </span>
+                                            <div className="flex gap-2 w-full">
+                                                <input
+                                                    type="text"
+                                                    value={docente.nombres}
+                                                    onChange={(e) =>
+                                                        actualizarDocente(index, 'nombres', e.target.value)
+                                                    }
+                                                    className="border rounded px-2 py-1 text-sm w-1/3"
+                                                    placeholder="Nombre(s)"
+                                                />
+
+                                                <input
+                                                    type="text"
+                                                    value={docente.apellido_paterno}
+                                                    onChange={(e) =>
+                                                        actualizarDocente(index, 'apellido_paterno', e.target.value)
+                                                    }
+                                                    className="border rounded px-2 py-1 text-sm w-1/3"
+                                                    placeholder="Apellido paterno"
+                                                />
+
+                                                <input
+                                                    type="text"
+                                                    value={docente.apellido_materno}
+                                                    onChange={(e) =>
+                                                        actualizarDocente(index, 'apellido_materno', e.target.value)
+                                                    }
+                                                    className="border rounded px-2 py-1 text-sm w-1/3"
+                                                    placeholder="Apellido materno"
+                                                />
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
@@ -264,6 +304,21 @@ export default function DocentesForm({ capacitacion, datos_default, docentes }) 
                                 required
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                 placeholder="Ej: Santiago Papasquiaro, Durango"
+                            />
+                        </div>
+
+                        {/* Fecha de emisión de la constancia */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Fecha de emisión en la constancia *
+                            </label>
+                            <input
+                                type="date"
+                                name="fecha_emision"
+                                value={formData.fecha_emision}
+                                onChange={handleChange}
+                                required
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                             />
                         </div>
 
